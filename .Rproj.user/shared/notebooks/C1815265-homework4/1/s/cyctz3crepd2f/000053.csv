@@ -1,0 +1,6 @@
+"0",""
+"0","ggplot(electionData, aes(x = poverty, y = voter_turnout)) +"
+"0","  geom_point(alpha = 0.6) +"
+"0","  geom_smooth(method = ""lm"", se = TRUE, color = ""red"") +"
+"0","  labs(title = ""Voter Turnout vs Poverty"", x = ""Poverty"", y = ""Turnout"") +"
+"0","  theme_minimal()"

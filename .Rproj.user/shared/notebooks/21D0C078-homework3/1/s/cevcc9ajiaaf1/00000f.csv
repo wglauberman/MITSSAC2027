@@ -1,0 +1,2 @@
+"0","rentalData = read.csv(""https://raw.githubusercontent.com/zjbranson/36401_fall2026/refs/heads/main/rentalData.csv"")"
+"0","View(rentalData)"

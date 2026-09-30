@@ -1,0 +1,2 @@
+"0",""
+"0","qqnorm(residuals(povertyDegree)); qqline(residuals(povertyDegree))"

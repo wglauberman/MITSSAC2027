@@ -1,0 +1,229 @@
+---
+title: "AI Assessment 1"
+subtitle: Due Monday, September 28 by 11:59pm
+author: "Will Glauberman"
+output:
+  pdf_document: default
+linkcolor: blue
+---
+
+In this assignment, you must grade and critique a 36-401 data analysis exam that was generated (almost) completely by artificial intelligence (AI). This document is outlined as follows:
+
+1) **Assignment Guidelines and Policies**: First, I outline the guidelines and policies for this assignment. Please read this carefully. In particular, **you should not use ANY artificial intelligence tools to complete this assignment**, because the goal is to assess your ability to critique real AI output. Also, as I discuss below, a large proportion of this assignment will be graded based on completeness rather than correctness, and so there should not be a strong motivation to use AI to complete this assignment.
+
+2) **AI Generation Process**: I then describe how I used AI tools to generate the data analysis exam. You **do not** need to use any of this information to critique the exam. Rather, this is just for informational purposes.
+
+3) **Assignment Questions**: After #1 and #2, the remainder of the document consists of questions that you must complete for this assignment.
+
+\newpage
+
+# Assignment Guidelines and Policies
+
+For this assignment, you are provided four documents:
+
+1) `chatGPT_DAExam1_start.pdf`: This is essentially last year's 36-401 data analysis exam (Fall 2025). To create this exam, I uploaded the corresponding .Rmd file to ChatGPT. (See the next page for details.)
+
+2) `chatGPT_DAExam1_completed.pdf`: This is the data analysis exam that ChatGPT generated after prompting and mild editing in order to make the resulting .Rmd file knit successfully. (See the next page for details.)
+
+3) `chatGPT_DAExam1_gradingRubric.pdf`: This is the grading rubric you will follow to grade the AI-generated data analysis exam in #2. This is essentially the rubric that we used to grade the data analysis exam last year.
+
+4) `aiAssessment1Assignment.Rmd`: This is the file you have open now, and you must knit and submit the resulting PDF to Gradescope. 
+
+In this assignment, you will use the grading rubric (#3) to grade the AI-generated data analysis exam (#2). In the "Assignment Questions" section below, I outline how, for each question, you will be asked to (a) grade each solution in the exam based on the rubric, (b) give a short explanation for your grading choices, and (c) briefly discuss what you think the strengths and weaknesses are of the exam's solutions.
+
+**Unlike the homeworks, you should not use ANY artificial intelligence tools to complete this assignment!** The main purpose of this assignment is to assess your ability to critique AI output, based on what we have learned so far in 36-401. Otherwise, you should complete the assignment just like a homework: You may look through your course materials, come to office hours, and discuss with others in the class, as long as the work you submit is your own work. As I discuss in the "Assignment Questions" section below, we will be giving a lot of partial credit, such that there shouldn't be a strong incentive to use AI tools to complete the assignment for you. 
+
+To do well on this assignment, I recommend following this process:
+
++ Read through the data analysis exam from last year (`chatGPT_DAExam1_start.pdf`), to understand what it entails.
+
++ Parse through each question in this document one by one, and read the corresponding parts of the AI-generated data anaylsis exam (`chatGPT_DAExam1_completed.pdf`).
+
++ Once you finish this assignment, read through your answers one last time (and perhaps edit accordingly) before you submit to Gradescope.
+
+
+\newpage
+
+# AI Generation Process
+
+Here I describe how I generated the `chatGPT_DAExam1_completed.pdf` file. This is the procedure I followed:
+
++ To generate the exam, I used a free version of ChatGPT on Monday, September 21, 2026. At this time, the free version's model was GPT-5.6 Luna. When I used this model, I clicked "Think", which supposedly tells ChatGPT to spend more time "reasoning" and "checking its work."
+
++ When using ChatGPT, I uploaded the 36-401 data analysis exam from last year (Fall 2025) with minimal changes. By "minimal changes," I mean that I deleted/edited any instance of the document calling it an "exam", and otherwise left all questions unchanged. The document I uploaded to ChatGPT is the exam .Rmd file, and I've uploaded the corresponding PDF to Canvas (`chatGPT_DAExam1_start.pdf`). When I uploaded the document, I gave this prompt:
+
+\begin{quotation}
+I have put together a data analysis document in RMarkdown (as an .Rmd file) that I would like to complete. The file has placeholders for R code ("PUT YOUR CODE HERE") and text/math ("PUT YOUR ANSWER HERE") that I would like filled in. Please do the following:
+
+1) Parse through the .Rmd file.
+
+2) For each problem/part where there are placeholders like "PUT YOUR CODE HERE" or "PUT YOUR ANSWER HERE", fill in with appropriate code/text/math/analyses.
+
+3) Return the completed .Rmd file.
+\end{quotation}
+
++ ChatGPT "worked" for 59 seconds and returned an .Rmd file; the resulting PDF is on Canvas (`chatGPT_DAExam1_completed.pdf`). When I downloaded the .Rmd file, it did not successfully knit, because (1) some code was commented out that shouldn't have been, and (2) there were odd LaTeX formatting issues that caused knitting errors. I uncommented the problematic code and fixed the LaTeX formatting issues, and otherwise did not change the .Rmd file. The PDF I uploaded is the resulting PDF from that .Rmd file.
+
++ The above process was actually the result of my *second* attempt to use ChatGPT to generate a 36-401 data analysis exam. When I followed the exact same process above the first time, ChatGPT generated an .Rmd file that successfully knitted as-is, but it included approximately 150 pages of R output. Rather than making you parse through 150+ pages of output, I simply tried the above process a second time; what I have given you is the result.
+
+\newpage
+
+# Assignment Questions
+
+**The remainder of this document consists of questions that you must complete for this assignment**, as you normally would for a homework assignment. **There are seven questions in total**, which ask you to grade and comment on the AI-generated data analysis exam. Specifically, each question asks you to grade and comment on **one or two** answers from the exam; so, please read each question carefully.
+
+That said, **each question for this assignment has a very similar structure.** In each question, you'll be asked to grade 1-2 answers from the exam based on the exam rubric on Canvas. Specifically, in each question, you will:
+
+1) provide a numeric score for the AI-generated exam answers. **This part will be graded totally based on completeness** (i.e., as long as a legitimate numeric score is provided, we will give 100% to this part). 
+
+2) give a short explanation why you gave that score, based on the rubric. **This part will be graded partially based on completeness, and partially based on whether you implemented the rubric correctly.** (For example, if the rubric prescribes a point deduction for a mistake that is in the exam, but you did not comment on this mistake, then we may deduct points. Similarly, if you deduct points for a mistake that is not in the exam, then we may deduct points.)
+
+3) give a short discussion of what you think the strengths and weaknesses are of the AI-generated exam answers. **This part will be graded partially based on completeness, and partially based on the correctness of your justifications.** (For example, similar to the previous item, if you think something is a strength in the exam, but it is not correct given what we have discussed in class, then we may deduct points. Similarly, if you think something is a weakness when it is largely correct given what we have discussed in class, then we may deduct points.)
+
+**Be sure to answer all questions, because (as stated above) we will be giving a lot of partial credit.**
+
+
+
+\newpage
+
+## Question 1: Grading Problem 1A and 1B from the Exam (16 points)
+
+This part of the exam involved EDA and diagnostics related to Research Question 1. Answer the following questions:
+
++ (3pts) What score, out of 10pts, would you give Problem 1A from the AI-generated data analysis exam? Please give a whole number (not a proportion or fraction) below.
+
+**10**
+
++ (3pts) What score, out of 10pts, would you give Problem 1B from the AI-generated data analysis exam? Please give a whole number (not a proportion or fraction) below.
+
+**8.5**
+
++ (5pts) In 1-3 sentences, give an explanation for the scores you gave to Problems 1A and 1B, based on the rubric. For this part, you just need to explain why you did (or did not) make point deductions, based on the rubric.
+
+**Based on the rubric, in part 1A the AI did everything necessary with their good histograms and scatterplot + labels as well as adequate enough descriptions of all the datasets as well as an initial hypothesis. In part B the regression model summary was good and the assumption plausbilities were all correct with descriptions that used the models right, but there was additional model of stuff we haven't seen (scale location) which was a -1.5 deduction on the rubric.**
+
++ (5pts) In 1-5 sentences, comment on the strengths and weaknesses of the AI-generated answers to these problems, based on your own general understanding of linear regression and data analysis. By "strengths and weaknesses", we just mean what you think the answers do well or not so well.
+
+**In general the graphs made were the best ones in that situation by my opinion and what the rubric had said, along with the code for them, although in 1B it went overboard adding unnecessary graphs. When making direct conclusions it excelled, but for the descriptions it could have been more clear exaclty what models were being referneced when. Because in this case it was mostly clear which by looking and the rubric saying to have lenience in these areas it didn't lose points but could in an upcoming question for doing this.**
+
+\newpage
+
+## Question 2: Grading Problem 1C from the Exam (13 points)
+
+This part of the exam involved assessing outliers and influential observations related to Research Question 1. Answer the following questions:
+
++ (3pts) What score, out of 10pts, would you give Problem 1C from the AI-generated data analysis exam? Please give a whole number (not a proportion or fraction) below.
+
+**10**
+
++ (5pts) In 1-3 sentences, give an explanation for the score you gave to Problem 1C, based on the rubric. For this part, you just need to explain why you did (or did not) make point deductions, based on the rubric.
+
+**The explanation given for outliers was clear and correct, and for the influential observations section it also did use cook's distance and explained how the graph showed influential points as well as giving a list of such points.**
+
++ (5pts) In 1-5 sentences, comment on the strengths and weaknesses of the AI-generated answers to this problem, based on your own general understanding of linear regression and data analysis. By "strengths and weaknesses", we just mean what you think the answers do well or not so well.
+
+**I think in this part of the question it does a better job clarifying what exactly it's using as an explanation even if it is obvious, and once again makes the correct graphing ideas for the question. The list of hundreds of numbers might have been unneccessary but was theoretically helpful to drive the point home of many influential points.**
+
+\newpage
+
+## Question 3: Grading Problems 1D and 1E from the Exam (16 points)
+
+This part of the exam involved choosing a linear regression model for Research Question 1, and interpreting the results from that model. Answer the following questions:
+
++ (3pts) What score, out of 14pts, would you give Problem 1D from the AI-generated data analysis exam? Please give a whole number (not a proportion or fraction) below.
+
+**11**
+
++ (3pts) What score, out of 10pts, would you give Problem 1E from the AI-generated data analysis exam? Please give a whole number (not a proportion or fraction) below.
+
+**10**
+
++ (5pts) In 1-3 sentences, give an explanation for the scores you gave to Problems 1D and 1E, based on the rubric. For this part, you just need to explain why you did (or did not) make point deductions, based on the rubric.
+
+**For 1D it was clear and made sense why the AI did regular pack year assessments, and the new regression scatterplot was good. There was also good models to look at linearity, equal variance and normality but did not bring up normality in the explanation (-1), also there was no cook's model or explanation for influential points here (-2). For 1E the communication was good, the summary was correct, and the text also did discuss positive relationships while using slope, CI and p-value.**
+
++ (5pts) In 1-5 sentences, comment on the strengths and weaknesses of the AI-generated answers to these problems, based on your own general understanding of linear regression and data analysis. By "strengths and weaknesses", we just mean what you think the answers do well or not so well.
+
+**When looking at 1E with the model it was good at making this model and getting the interpretations from it. However when making all the graphs of part 1D, it did not consider re-mentioning the cook's graphs from part 1C, or the idea that each of the assumptions talked about in previous problems should be re-touched on.**
+
+\newpage
+
+## Question 4: Grading Problem 1F from the Exam (13 points)
+
+This part of the exam involved generating and interpreting predictions from a linear regression model. Answer the following questions:
+
++ (3pts) What score, out of 10pts, would you give Problem 1F from the AI-generated data analysis exam? Please give a whole number (not a proportion or fraction) below.
+
+**10**
+
++ (5pts) In 1-3 sentences, give an explanation for the score you gave to Problem 1F, based on the rubric. For this part, you just need to explain why you did (or did not) make point deductions, based on the rubric.
+
+**Both parts of the question were well answered, with a correctly made confidence interval and prediction interval graph (even though the rubric says predictions lines should be red the question says blue so it is ok) and good explanations for differences and decription.**
+
++ (5pts) In 1-5 sentences, comment on the strengths and weaknesses of the AI-generated answers to this problem, based on your own general understanding of linear regression and data analysis. By "strengths and weaknesses", we just mean what you think the answers do well or not so well.
+
+**I think it did particular excellence here (for what was expected) because the prediction interval and confidence interval as well as the original line because these can be made directly with R code functions and direct analyzation can be applied. When it firsts needs to make a model, than re-interpret functions of that model (like variance and influentialness) it might be harder to harken back to the original regression graph as well, with it not being in the same question sub-section.**
+
+\newpage
+
+## Question 5: Grading Problem 2A from the Exam (13 points)
+
+This part of the exam involved interpreting a graph related to Research Question 2. Answer the following questions:
+
++ (3pts) What score, out of 8pts, would you give Problem 2A from the AI-generated data analysis exam? Please give a whole number (not a proportion or fraction) below.
+
+**8**
+
++ (5pts) In 1-3 sentences, give an explanation for the score you gave to Problem 2A, based on the rubric. For this part, you just need to explain why you did (or did not) make point deductions, based on the rubric.
+
+**The answer about the diagonal graph touched on all necessary parts as laid out by the rubric, including how the exponential smoking use is made, and the fact that it is obvious that those who smoke x packs/day would be on the same linear path over years.**
+
++ (5pts) In 1-5 sentences, comment on the strengths and weaknesses of the AI-generated answers to this problem, based on your own general understanding of linear regression and data analysis. By "strengths and weaknesses", we just mean what you think the answers do well or not so well.
+
+**In this answer everything was answered basically perfectly, would say no weaknesses, and this shows its strength of direct analyzation of R data and linear conclusions.**
+
+\newpage
+
+## Question 6: Grading Problems 2B and 2C from the Exam (16 points)
+
+This part of the exam involved EDA and linear regression results related to Research Question 2. Answer the following questions:
+
++ (3pts) What score, out of 10pts, would you give Problem 2B from the AI-generated data analysis exam? Please give a whole number (not a proportion or fraction) below.
+
+**10**
+
++ (3pts) What score, out of 10pts, would you give Problem 2C from the AI-generated data analysis exam? Please give a whole number (not a proportion or fraction) below.
+
+**10**
+
++ (5pts) In 1-3 sentences, give an explanation for the scores you gave to Problems 2B and 2C, based on the rubric. For this part, you just need to explain why you did (or did not) make point deductions, based on the rubric.
+
+**In problem 2B the AI correctly uses scatterplots and has good labeling for both graphs while not making extra, and its conclusions of positive relationship have basis in the graphs. Then for question 2C the models made logical sense, how they were implemented in R was correct and the conclusion of positive slopes was right as well.**
+
++ (5pts) In 1-5 sentences, comment on the strengths and weaknesses of the AI-generated answers to these problems, based on your own general understanding of linear regression and data analysis. By "strengths and weaknesses", we just mean what you think the answers do well or not so well.
+
+**These were two more strong answers from the AI, with graphs well done and explanations also making sense in context, as well as summaries giving the necessary info. Only as a small nit-pick i would say that in 2C it just says statistical evidence of some association (not positive), for me it was clear that it was positive based on the earlier AI comments that the slopes were positive but in general could be careful there.**
+
+\newpage
+
+## Question 7: Grading Problem 2D from the Exam (13 points)
+
+This part of the exam involved conducting hypothesis tests using a linear regression model. Answer the following questions:
+
++ (3pts) What score, out of 8pts, would you give Problem 2D from the AI-generated data analysis exam? Please give a whole number (not a proportion or fraction) below.
+
+**8**
+
++ (5pts) In 1-3 sentences, give an explanation for the score you gave to Problem 2D, based on the rubric. For this part, you just need to explain why you did (or did not) make point deductions, based on the rubric.
+
+**The AI correctly made 95% confidence intervals in both cases, and also correctly stated that neither hypothesis made sense because the value 500 was not in the confidence intervals.**
+
++ (5pts) In 1-5 sentences, comment on the strengths and weaknesses of the AI-generated answers to this problem, based on your own general understanding of linear regression and data analysis. By "strengths and weaknesses", we just mean what you think the answers do well or not so well.
+
+**The Ai was good with making a confidence interval at 95% and also had helpful comment explanations of what to do in the R code, as well as its regular explanations being sufficient. It did not matter in this case, but the AI should make sure to state its commented reasoning that was in the R code also in the answer bubble to show correct reasoning.**
+
+
+
+
+
+

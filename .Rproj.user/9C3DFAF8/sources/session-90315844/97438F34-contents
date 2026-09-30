@@ -1,0 +1,246 @@
+---
+title: "73-265 Homework 3: Regression, uncertainty, and Exam 1 preparation"
+author: "Student Name"
+format:
+  html:
+    embed-resources: true
+    css: ../../setup/ryg_assignments.css
+execute:
+  warning: false
+  message: false
+---
+
+## Purpose and timing
+
+This individual asynchronous homework is one of six equally weighted homework assignments. Your lowest homework percentage will be dropped; each of the five counted homework percentages contributes **2% of the final course grade**. The simple-regression portion is available after Class 7. The uncertainty portion uses Class 8. The graded core does not require Class 9 multiple regression or omitted-variable-bias material.
+
+- Release shell: after Class 7 on Monday, September 21
+- Full uncertainty portion usable: after Class 8 on Wednesday, September 23
+- Due: Saturday, September 26 at 11:59 p.m. Eastern
+- Full self-check solution: released immediately after the due time
+
+::: {.ryg-policy}
+### AI Policy
+
+Each question or part carries a visible **RED**, **YELLOW**, or **GREEN** designation. **RED** means no AI use and requires independent reasoning. **YELLOW** permits AI only within the stated constraints; disclose the tool, how and where it was used, and the key prompts, inputs, or intermediate steps that materially shaped the answer. **GREEN** permits broad AI use; disclose the tool and where it was used, and remain responsible for the quality of the result and your judgment.
+
+When you use an LLM or other generative-AI tool on a YELLOW or GREEN item, also submit the prompts used as screenshots of the relevant prompts/conversation or as prompts copied into a text document. Submit the disclosure and prompt documentation with the assignment in the manner specified on Canvas. Prompt submission is additional to citation/acknowledgment and the explanation of use; it does not make prohibited use permissible. For an AI-enabled tool without a meaningful prompt interaction, disclose the tool and explain its use, but no fictional prompt artifact is required.
+
+AI use is not required unless a question explicitly states otherwise. If an item is unlabeled or unclear, ask the instructor before using AI. See the syllabus for the complete course AI policy.
+:::
+
+## Files and submission
+
+Work inside the supplied `73-265-HW3` folder. Save and submit matching files:
+
+- `LastName_FirstName_HW3.qmd`
+- `LastName_FirstName_HW3.html`
+
+Do not submit a ZIP archive. Homework is not timed and is not completed in an assigned recitation slot.
+
+```{r}
+library(tidyverse)
+
+bikes <- read_csv("data/daily_bike_rentals.csv", show_col_types = FALSE)
+```
+
+## 1. Question, source, unit, and variables
+
+<p class="ryg-part"><span class="ryg-label ryg-red">RED</span> State the source, unit, variables, and descriptive/predictive/causal classification from your own understanding.</p>
+
+Read `data/DATA_PROVENANCE.md`. State:
+
+- the unit of observation;
+- the sample period and real-world system;
+- the outcome and its unit;
+- the predictor and its unit;
+- whether the question "How do daily rentals differ with temperature?" is descriptive, predictive, or causal as currently posed.
+
+## 2. Inspect and verify the data
+
+<p class="ryg-part"><span class="ryg-label ryg-yellow">YELLOW</span> AI may assist with inspection or identity-check syntax; verify every reported value and equality check.</p>
+
+Use code to report dimensions, variable names, ranges of `temperature_c` and `total_rentals`, and missing values in those two variables. Verify that `casual_rentals + registered_rentals = total_rentals` for every row.
+
+```{r}
+# Inspection and source-structure checks here.
+
+```
+
+## 3. Visualize the relationship
+
+<p class="ryg-part"><span class="ryg-label ryg-yellow">YELLOW</span> AI may suggest or debug plotting code; you must verify the graph, units, labels, and source.</p>
+<p class="ryg-part"><span class="ryg-label ryg-red">RED</span> Describe direction, form, strength, and unusual cases independently before fitting the model.</p>
+
+Make a scatterplot of daily rentals against temperature. Include a question-focused title, units, a readable theme, and a source caption. Describe direction, form, strength, and unusual cases before fitting a model.
+
+```{r}
+# Scatterplot here.
+
+```
+
+## 4. Fit a simple regression
+
+<p class="ryg-part"><span class="ryg-label ryg-red">RED</span> Fit and identify this foundational simple-regression model independently; AI-generated code or commands are not permitted for this item.</p>
+
+Fit:
+
+\[
+total\_rentals_i = b_0 + b_1 temperature\_c_i + e_i.
+\]
+
+Print the model summary and save the fitted model as `bike_model`.
+
+```{r}
+# Fit and inspect bike_model here.
+
+```
+
+## 5. Interpret slope and intercept
+
+<p class="ryg-part"><span class="ryg-label ryg-red">RED</span> Interpret both coefficients and assess the intercept's usefulness using your own reasoning.</p>
+
+Interpret the slope in daily rentals per degree Celsius using "associated with" and "on average." Then interpret the intercept. Check the observed temperature range and explain whether the zero-degree intercept is substantively useful or primarily a line-positioning quantity.
+
+## 6. Fitted value and residual
+
+<p class="ryg-part"><span class="ryg-label ryg-yellow">YELLOW</span> AI may assist with `mutate()`, `fitted()`, or `residuals()` syntax or debugging; verify the selected date and numerical outputs.</p>
+<p class="ryg-part"><span class="ryg-label ryg-red">RED</span> Explain the residual sign and the observed = fitted + residual identity independently.</p>
+
+Create `bikes_augmented` from `bikes` using `mutate()`, `fitted(bike_model)`, and `residuals(bike_model)`. Name the new columns `fitted` and `resid`. For **2012-05-15**:
+
+- report observed rentals;
+- report fitted rentals;
+- report the residual;
+- explain the residual's sign in words;
+- verify numerically that observed = fitted + residual.
+
+```{r}
+# Add fitted values/residuals and inspect 2012-05-15.
+
+```
+
+## 7. Interpret R-squared narrowly
+
+<p class="ryg-part"><span class="ryg-label ryg-red">RED</span> Interpret R-squared and state its limitation independently.</p>
+
+Use `summary(bike_model)` to report R-squared and interpret it only as a summary of sample variation accounted for by this fitted relationship. State one thing R-squared does not establish.
+
+## 8. Read uncertainty output
+
+<p class="ryg-part"><span class="ryg-label ryg-yellow">YELLOW</span> AI may assist with `summary()`/`confint()` syntax or output organization; verify all numerical values against R.</p>
+<p class="ryg-part"><span class="ryg-label ryg-red">RED</span> Interpret the standard error, interval, p-value, and null hypothesis in context independently.</p>
+
+Use `summary(bike_model)` and `confint(bike_model)`. Report for `temperature_c`:
+
+- the estimate;
+- standard error;
+- 95% confidence interval;
+- p-value and the null hypothesis tested by that p-value.
+
+Interpret the standard error, confidence interval, and p-value in context.
+
+```{r}
+# Coefficient output and confidence interval here.
+
+```
+
+## 9. Statistical and practical significance
+
+<p class="ryg-part"><span class="ryg-label ryg-red">RED</span> Complete the five-degree calculation and distinguish statistical from practical significance independently.</p>
+
+Use the fitted slope to calculate the predicted difference in daily rentals associated with a **5 degree Celsius** temperature difference. Compare that difference with the sample mean of daily rentals. Explain separately:
+
+1. what the statistical evidence says; and
+2. whether the magnitude appears practically meaningful for system operations.
+
+```{r}
+# Five-degree comparison and sample mean here.
+
+```
+
+## 10. Evidence and limits
+
+<p class="ryg-part"><span class="ryg-label ryg-red">RED</span> Formulate warranted/unwarranted conclusions and identify confounding factors using your own causal reasoning.</p>
+
+Write one warranted conclusion and one unwarranted conclusion. Identify at least two real day-level factors that could be associated with both temperature and rentals. This question asks only for limits of the simple descriptive comparison; it does not require a multiple regression.
+
+## 11. Concise verification record
+
+<p class="ryg-part"><span class="ryg-label ryg-yellow">YELLOW</span> AI may assist with compact-table syntax; verify every diagnostic value.</p>
+<p class="ryg-part"><span class="ryg-label ryg-red">RED</span> Explain independently why the checks do not establish causal validity.</p>
+
+Create a compact named vector or one-row table containing:
+
+- row count;
+- missing outcome count;
+- missing predictor count;
+- rental-component identity failures;
+- maximum absolute error in `observed - fitted - residual`.
+
+Explain why these checks are useful but do not prove that the model is causally valid.
+
+```{r}
+# Deterministic verification output here.
+
+```
+
+
+## Exam-Style Practice
+
+The following paper-friendly example is independent of the bike-rental analysis. A food-processing plant records one observation per operating day. The outcome is daily electricity use in MWh; the predictor is scheduled production hours. Across observed days, production hours range from 8 to 24.
+
+The fitted simple regression is:
+
+\[
+electricity use = 18.00 + 0.75(production\ hours).
+\]
+
+| Term | Estimate | Standard error | 95% confidence interval | p-value |
+|---|---:|---:|---:|---:|
+| Intercept | 18.00 | 3.00 | [12.10, 23.90] | <0.001 |
+| Production hours | 0.75 | 0.20 | [0.35, 1.15] | <0.001 |
+
+On one 20-hour day, actual electricity use was 35 MWh. The sample mean was 30 MWh.
+
+### Block A — Coefficients, fitted value, and residual
+
+<p class="ryg-part"><span class="ryg-label ryg-red">RED</span> Without R or AI: (a) interpret the slope with units and associational language; (b) interpret the intercept and explain whether it is interpolation or extrapolation; (c) calculate the fitted value for the 20-hour day; and (d) calculate and interpret its residual.</p>
+
+### Block B — Uncertainty and claim audit
+
+<p class="ryg-part"><span class="ryg-label ryg-red">RED</span> Without R or AI: (a) interpret the slope standard error; (b) interpret the 95% confidence interval; (c) state the null tested by the slope p-value and what the reported evidence means; and (d) explain why the output does not establish that adding one scheduled production hour causes electricity use to rise by exactly 0.75 MWh.</p>
+
+### Block C — Statistical versus practical importance
+
+<p class="ryg-part"><span class="ryg-label ryg-red">RED</span> Without R or AI: (a) calculate the fitted electricity-use difference for an 8-hour production difference; (b) compare it with the 30-MWh sample mean; (c) discuss statistical and practical importance separately; and (d) name one plausible day-level alternative explanation for the association.</p>
+
+### Verify the arithmetic
+
+<p class="ryg-part"><span class="ryg-label ryg-yellow">YELLOW</span> Use the supplied coefficients to verify the fitted value, residual, and eight-hour comparison in R. AI may assist with arithmetic-code syntax, but the interpretations above must be completed independently.</p>
+
+```{r}
+intercept_exam <- 18
+slope_exam <- 0.75
+
+# Calculate fitted_20_hours, residual_20_hours, and eight_hour_difference.
+
+```
+
+## 12. AI disclosure
+
+<p class="ryg-part"><span class="ryg-label ryg-red">RED</span> Complete the authorship disclosure yourself; do not use AI to draft or revise it.</p>
+
+Write `No AI used.` or identify each YELLOW/GREEN item on which AI materially assisted, the tool, how it assisted, and what you checked. Submit the required prompt documentation separately with the assignment as specified on Canvas. AI is permitted only where designated and is never required.
+
+## 13. Clean-session submission check
+
+<p class="ryg-part"><span class="ryg-label ryg-yellow">YELLOW</span> AI may help diagnose a rendering error, but you must personally perform and verify every submission check.</p>
+
+Restart R, render without Console-created objects, inspect the HTML, and submit the matching QMD and HTML files.
+
+## Optional ungraded extension
+
+<p class="ryg-part"><span class="ryg-label ryg-green">GREEN</span> Broad AI assistance is permitted for this optional exploration; disclose tool use and verify the comparison.</p>
+
+Replace `temperature_c` with `feels_like_c` in a separate simple regression. Compare the estimated slopes and model fit. Both predictors are measured in degrees Celsius, so the slopes have the same units: additional daily rentals per 1°C. Explain what is similar or different about the two relationships, while remembering that actual temperature and feels-like temperature are distinct measures.

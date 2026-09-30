@@ -1,0 +1,192 @@
+---
+title: "36-401 Homework 3"
+subtitle: Due Friday, September 18 by 11:59pm
+author: "YOUR NAME"
+output: pdf_document
+urlcolor: blue
+---
+
+***PLEASE READ (General Instructions for All Assignments)***: 
+
++ Use this file as the template for your submission. Please write your name at the top of this page.
+
++ There are placeholders for your answers/code, marked clearly in **bold**. Put your answers in *italics* or **bold** so they are easier to see. That said, you don't have to write math in italics/bold; instead, you should write mathematical answers in LaTeX or by hand. **If you write any answers by hand, you must merge your PDFs appropriately and clearly "match" the scanned handwritten pages on your PDF in Gradescope to the corresponding question you're answering.**
+
++ Questions will sometimes have subparts denoted with bullets; do your best to answer each question. Partial credit will be given, so you should attempt each question.
+
++ Include any code you used to arrive at your answers. Furthermore, clearly explain how you arrived at your answers (i.e., show your work for each question).
+
++ At the bottom of this page is an AI use form that you MUST fill out for each homework. The form should not take long to fill out, but **IF YOU DO NOT FILL OUT THE AI USE FORM APPROPRIATELY, WE WILL DEDUCT 5pts FROM YOUR HOMEWORK.** (By "appropriately", we mean that you filled out the form completely and gave genuine answers on the form.)
+
++ **It is your responsibility to read through your PDF before you submit it to Gradescope.** If parts of your homework are not readable (e.g., code runs off the page, mathematical derivations are difficult to read, scans are poor quality, etc.), we will deduct points accordingly.
+
++ You may discuss homework problems with other students, but all of your homework must be only your own. **You cannot copy, or nearly copy, material from other resources** (whether it's from other students, online resources/entities, AI tools, past solutions, or any other resource). **It is your responsibility to read, understand, and adhere to the Academic Integrity and AI Use policies in the syllabus.** If the policies are unclear to you, you should email the instructor.
+
++ **Late homeworks will not be accepted.** If you cannot complete a homework, you should at least submit a partial homework. **Even though the deadline is Friday 11:59pm, we will leave the Gradescope submission window open until 1:00am without penalty in case some time is needed to compile/submit your homework.** Homeworks will not be accepted after the Gradescope submission window has closed. Remember that there is one homework drop for the class.
+
+# AI USE FORM: COMPLETE FOR ALL ASSIGNMENTS
+
+AFTER you have completed this assignment, [you must fill out this short AI use form for this assignment](https://forms.gle/abwQf73zzqYgwi1U7).
+
+The form outlines how you did (or did not) use AI tools as you worked on this assignment. Anything you think falls under "AI" should be included. On the form, we ask for your Andrew ID so that we can match your answers to your homework, and we ask for an email address so that you can receive a copy of your responses (so you have documentation of your responses). We WILL NOT grade your assignment based on your responses. However, if you do not fill out the form, we will deduct 5pts from your assignment.
+
+# Problem 1: Considering Residuals in Linear Regression (60 points)
+
+For this problem, we'll consider the Normal simple linear regression model,
+
+$$Y_i = \beta_0 + \beta_1 X_i + \epsilon_i, \text{ for } i =1,\dots,n$$
+
+where $\epsilon_i | X \stackrel{iid}{\sim} N(0, \sigma^2)$. Specifically, we'll consider the outcomes $Y_i$ and *true* residuals $\epsilon_i$, and compare them to the fitted values $\hat{Y}_i = \hat{\beta}_0 + \hat{\beta}_1 X_i$ and the estimated residuals $\hat{\epsilon}_i = Y_i - \hat{Y}_i$. Here, $\hat{\beta}_0$ and $\hat{\beta}_1$ are the typical least squares estimators.
+
+## PART A (10pts)
+
+Let $\overline{Y}$ denote the sample average of $(Y_1,\dots,Y_n)$, and let $\overline{\hat{Y}}$ denote the sample average of $(\hat{Y}_1,\dots,\hat{Y}_n$). For this part, do the following two things:
+
++ Show $\overline{Y} = \overline{\hat{Y}}$, meaning that the mean outcome is equal to the mean fitted value.
+
++ Let $\overline{\hat{\epsilon}}$ denote the sample average of $(\hat{\epsilon}_1, \dots, \hat{\epsilon}_n)$. Given that $\overline{Y} = \overline{\hat{Y}}$, show mathematically what $\overline{\hat{\epsilon}}$ equals.
+
+**[PUT YOUR ANSWER HERE]**
+
+## PART B (8pts)
+
+For this part, we'll just consider the covariate values $(X_1,\dots,X_n)$. Show that the following equality holds:
+
+$$\sum_{i=1}^n (X_i - \overline{X})^2 = \sum_{i=1}^n (X_i^2 - \overline{X}^2)$$
+
+Thus, we can seemingly "bring the square into" the difference $(X_i - \overline{X})$.
+
+**[PUT YOUR ANSWER HERE]**
+
+## PART C (12pts)
+
+For this part, do the following two things:
+
++ Show that $\sum_{i=1}^n \hat{\epsilon}_i \hat{Y}_i = 0$.
++ Show that the sample covariance of the $\hat{\epsilon}_i$ and $\hat{Y}_i$ equals zero.  As a reminder, given observations $(X_1,\dots, X_n)$ and $(Y_1,\dots,Y_n)$, then the sample covariance between the $X_i$ and $Y_i$ is
+$$\frac{1}{n-1} \sum_{i=1}^n (X_i - \overline{X})(Y_i - \overline{Y})$$
+
+**Hint**: You'll likely find it helpful to use the results from Part A and Part B to prove this result. In your work for this part, just be clear when and how you are using results from Parts A and B to solve this problem. That said, it is also fine if you can solve this problem without the Part A and B results.
+
+**[PUT YOUR ANSWER HERE]**
+
+## PART D (10pts)
+
+Now we will consider the covariance of the individual outcomes $Y_i$ and their fitted values $\hat{Y}_i$. For this part, show that
+
+$$\text{Cov}(Y_i, \hat{Y}_i | X) = \frac{\sigma^2}{n} + \frac{\sigma^2 (X_i - \overline{X})^2}{\sum_{i=1}^n (X_i - \overline{X})^2}$$
+
+This means that $Y_i$ and $\hat{Y}_i$ will always have a positive covariance, which is intuitive: We would hope that our fitted values $\hat{Y}_i$ have some positive association with the actual outcome values $Y_i$.
+
+**Hint**: For this part, you may use previous results that we've discussed in class to derive this conditional covariance. In your answer, just be clear what results from class you're using in your derivation.
+
+**[PUT YOUR ANSWER HERE]**
+
+## PART E (12pts)
+
+For this part, do the following two things:
+
++ Derive $\text{Var}(\hat{\epsilon}_i | X)$, i.e., the conditional variance of the estimated residuals $\hat{\epsilon}_i = Y_i - \hat{Y}_i$.
+
++ In 1-3 sentences, discuss how the true residual variance $\sigma^2$, sample size $n$, and empirical variance of the covariate $X$ affect the conditional variance of the estimated residuals.
+
+**Hint**: For the first part, you may use previous results that we've discussed in class to derive the conditional variance. In your answer, just be clear what results from class you're using in your derivation. For the second part, by "affect," I just mean whether the conditional variance increases, decreases, or is not affected by these quantities ($\sigma^2$, $n$, and empirical variance of $X$).
+
+**[PUT YOUR ANSWER HERE]**
+
+## PART F (8pts)
+
+In class, we've considered the residual sum of squares, which are defined as $\sum_{i=1}^n \hat{\epsilon}_i^2$. We have the following distributional result:
+
+$$\frac{\sum_{i=1}^n \hat{\epsilon}_i^2}{\sigma^2} | X \sim \chi^2_{n-2}$$
+
+You may take this result for granted in this problem. For this part, derive the distribution of
+
+$$\frac{\sum_{i=1}^n \epsilon_i^2}{\sigma^2} | X$$
+This is the exact same quantity, but with the *true* residuals $\epsilon_i$ instead of the estimated ones, $\hat{\epsilon}_i$. Be sure to explain how you determined the distribution for $\frac{\sum_{i=1}^n \epsilon_i^2}{\sigma^2} | X$. After determining the distribution, answer the following: How does the conditional variance of $\frac{\sum_{i=1}^n \epsilon_i^2}{\sigma^2}$ compare to the conditional variance of $\frac{\sum_{i=1}^n \hat{\epsilon}_i^2}{\sigma^2}$? Please answer in 1-2 sentences, and explain your reasoning.
+
+**Hint**: The variance of a $\chi^2_d$ distribution is $2d$.
+
+**[PUT YOUR ANSWER HERE]**
+
+# Problem 2: Analyzing Rental Properties (40 points)
+
+For this problem, we'll consider data on apartments for rent in an undisclosed city. Here is the data:
+
+```{r}
+rentalData = read.csv("https://raw.githubusercontent.com/zjbranson/36401_fall2026/refs/heads/main/rentalData.csv")
+```
+
+There are only four variables in this dataset: 
+
++ `rent`: The monthly rental price of the apartment (in US dollars). This is paid by the person who rents the apartment.
++ `age`: The age of the apartment (in years).
++ `expense`: The monthly operating expenses and taxes for the apartment (in US dollars). This is paid by the person who owns the apartment.
++ `space`: The size of the apartment (in square feet).
+
+Let's say that, for good or bad, we have been hired by a powerful real estate broker to understand how rental prices in the city are related to aspects of apartments. To do this, we'll consider three simple linear regression models:
+
+1) **Rent-Age Regression**: A model that regresses `rent` (the outcome) on `age` (the covariate). 
+2) **Rent-Expense Regression**: A model that regresses `rent` (the outcome) on `expense` (the covariate). 
+3) **Rent-Space Regression**: A model that regresses `rent` (the outcome) on `space` (the covariate).
+
+The following questions ask you about these three potential regression models.
+
+## PART A (8pts)
+
+Before implementing the regressions above, please do the following: For *each* of the three regression models, make *one* form of graphical EDA that best allows you to assess the simple linear regression model assumptions. Thus, you should make three graphs (one for each regression model). Then, after displaying your graphs, answer the following two questions:
+
++ In 1-3 sentences, explain why your form of graphical EDA best allows you to assess the simple linear regression model assumptions.
+
++ Based on your EDA, which of the three linear regression models would most realistically satisfy the model's assumptions? Please pick only **one** of the models, and explain your reasoning in 1-3 sentences.
+
+```{r}
+# PUT YOUR EDA HERE
+```
+
+**[PUT YOUR ANSWER HERE]**
+
+**Hint**: For your EDA, we are only asking you to create visuals of the variables themselves. Thus, we *do not* expect you to fit linear regression models in order to create your EDA.
+
+## PART B (8pts)
+
+Now run each of the three linear regression models stated at the beginning of this problem. After running your regressions, please display `summary()` output for each model. Then, for *each* model, write a one-sentence interpretation of the *point estimate for the slope parameter* of that model. 
+
+**Hint**: For the purposes of this question, you can pretend that the modeling assumptions are satisfied, regardless of your answer in Part A. You also don't have to consider statistical significance---or lack thereof---for this part; you only have to consider the *point estimate*.
+
+```{r}
+# PUT YOUR CODE HERE
+```
+
+**[PUT YOUR ANSWER HERE]**
+
+## PART C (8pts)
+
+In Part B, you should have run three linear regression models. For this part, please do the following: For *each* model, compute the 95\% confidence interval for the slope parameter of that model. Then, for each interval, write a 1-2 sentence practical interpretation of that confidence interval within the context of the data.
+
+**Hint**: By "practical interpretation," I mean to comment on the direction and magnitude of the effect you can conclude, if anything, and the statistical inference you can conduct, if anything, from your interval (as we've discussed in class). Furthermore, for the purposes of this question, you can pretend that the modeling assumptions are satisfied, regardless of your answer in Part A.
+
+```{r}
+# PUT YOUR CODE HERE
+```
+
+**[PUT YOUR ANSWER HERE]**
+
+## PART D (8pts)
+
+For *each* of the three regression models, interpret the point estimate and confidence interval *for the intercept*, based on your `summary()` output from Part B. Furthermore, for each, state whether the intercept parameter has a scientifically meaningful interpretation, within the context of this dataset. State Yes or No, and explain your reasoning in one sentence.
+
+**[PUT YOUR ANSWER HERE]**
+
+
+## PART E (8pts)
+
+To wrap up this homework, let's keep in mind that (as stated at the beginning of the problem) we've been hired by a powerful real estate broker. The real estate broker looks at your analyses, and states the following:
+
+"Let's say that I buy all of these apartments, such that I become the landlord for all of them. Your analyses suggest that if I manage to decrease the monthly expenses of each apartment by \$100, then the rental price is estimated to go down by only \$17.26, on average, resulting in a \$82.74 increased monthly profit for each apartment, on average."
+
+Do you agree or disagree with the broker's claim? State Agree or Disagree, and explain your reasoning in 1-3 sentences.
+
+**Hint**: For the purposes of this question, unrealistically assume that the broker cannot directly control rental prices, and instead, rental prices are dictated by the same market forces that dictated rental prices in the data. (In real-world scenarios, it's unlikely that a landlord would willingly let rental prices decrease.)
+
+**[PUT YOUR ANSWER HERE]**

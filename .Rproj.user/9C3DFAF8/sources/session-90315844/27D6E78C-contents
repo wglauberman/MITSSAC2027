@@ -1,0 +1,260 @@
+---
+title: "36-401 Homework 4"
+subtitle: Due Friday, September 25 by 11:59pm
+author: "Will Glauberman"
+output: pdf_document
+urlcolor: blue
+---
+
+***PLEASE READ (General Instructions for All Assignments)***: 
+
++ Use this file as the template for your submission. Please write your name at the top of this page.
+
++ There are placeholders for your answers/code, marked clearly in **bold**. Put your answers in *italics* or **bold** so they are easier to see. That said, you don't have to write math in italics/bold; instead, you should write mathematical answers in LaTeX or by hand. **If you write any answers by hand, you must merge your PDFs appropriately and clearly "match" the scanned handwritten pages on your PDF in Gradescope to the corresponding question you're answering.**
+
++ Questions will sometimes have subparts denoted with bullets; do your best to answer each question. Partial credit will be given, so you should attempt each question.
+
++ Include any code you used to arrive at your answers. Furthermore, clearly explain how you arrived at your answers (i.e., show your work for each question).
+
++ At the bottom of this page is an AI use form that you MUST fill out for each homework. The form should not take long to fill out, but **IF YOU DO NOT FILL OUT THE AI USE FORM APPROPRIATELY, WE WILL DEDUCT 5pts FROM YOUR HOMEWORK.** (By "appropriately", we mean that you filled out the form completely and gave genuine answers on the form.)
+
++ **It is your responsibility to read through your PDF before you submit it to Gradescope.** If parts of your homework are not readable (e.g., code runs off the page, mathematical derivations are difficult to read, scans are poor quality, etc.), we will deduct points accordingly.
+
++ You may discuss homework problems with other students, but all of your homework must be only your own. **You cannot copy, or nearly copy, material from other resources** (whether it's from other students, online resources/entities, AI tools, past solutions, or any other resource). **It is your responsibility to read, understand, and adhere to the Academic Integrity and AI Use policies in the syllabus.** If the policies are unclear to you, you should email the instructor.
+
++ **Late homeworks will not be accepted.** If you cannot complete a homework, you should at least submit a partial homework. **Even though the deadline is Friday 11:59pm, we will leave the Gradescope submission window open until 1:00am without penalty in case some time is needed to compile/submit your homework.** Homeworks will not be accepted after the Gradescope submission window has closed. Remember that there is one homework drop for the class.
+
+# AI USE FORM: COMPLETE FOR ALL ASSIGNMENTS
+
+AFTER you have completed this assignment, [you must fill out this short AI use form for this assignment](https://forms.gle/5ZFZjgxtNTptJ6119).
+
+The form outlines how you did (or did not) use AI tools as you worked on this assignment. Anything you think falls under "AI" should be included. On the form, we ask for your Andrew ID so that we can match your answers to your homework, and we ask for an email address so that you can receive a copy of your responses (so you have documentation of your responses). We WILL NOT grade your assignment based on your responses. However, if you do not fill out the form, we will deduct 5pts from your assignment.
+
+\newpage
+
+# Problem 1: Signal + Noise (34 points)
+
+In class, we discussed how the least-squares estimators $\hat{\beta}_0$ and $\hat{\beta}_1$ can be written as a "signal + noise" decomposition. In this problem, we'll study that phenomenon.
+
+Throughout this problem, assume that the Normal simple linear regression model holds, such that
+
+$$Y_i = \beta_0 + \beta_1 X_i + \epsilon_i, \text{  for  } i=1,\dots,n$$
+where $\epsilon_i | X \stackrel{iid}{\sim} N(0, \sigma^2)$.
+
+## PART A (17pts)
+
+Show that the ``signal + noise'' decomposition we discussed in class for the least squares estimators holds. In other words, show that:
+
+\begin{align*}
+\hat{\beta}_1 &= \beta_1 + \frac{\frac{1}{n} \sum_{i=1}^n \epsilon_i (X_i - \bar{X})}{\widehat{\text{Var}}_n(X)}, \text{ and } \\
+\hat{\beta}_0 &= \beta_0 + \frac{1}{n} \sum_{i=1}^n \epsilon_i \left\{ 1 - \frac{\overline{X} (X_i-\overline{X})}{\widehat{\text{Var}}_n(X)} \right\}
+\end{align*}
+
+where $\widehat{\text{Var}}_n(X) = \frac{1}{n} \sum_{i=1}^n (X_i - \bar{X})^2$. As always, be sure to explain your work step-by-step for how you arrived at your answer. 
+
+**Hint**: We've previously noted that $\sum_{i=1}^n (X_i - \bar{X}) \bar{Y} = 0$. As a result, $\sum_{i=1}^n (X_i - \bar{X})(Y_i - \bar{Y}) = \sum_{i=1}^n (X_i - \bar{X})Y_i$. For this problem, it will be useful for you to understand why these results are true. Furthermore, it will be useful to first prove the above result for $\hat{\beta}_1$, and then use that result to work with $\hat{\beta}_0$. 
+
+
+**[PUT YOUR ANSWER HERE]**
+
+## PART B (17pts)
+
+In class, we communicated that the following result holds:
+
+$$\text{Cov}(\hat{\beta}_0, \hat{\beta}_1 | X) = -\bar{X} \text{Var}(\hat{\beta}_1 | X)$$
+
+For this part, use the "signal + noise" decomposition from Part A to prove that the above equality holds. As always, be sure to explain your work step-by-step for how you arrived at your answer.
+
+**Hint**: In general, consider random variables $X_1,\dots,X_n$ and $Y_1,\dots,Y_n$. Then, the following is true:
+
+$$\text{Cov} \left( \sum_{i=1}^n X_i, \sum_{i=1}^n Y_i \right) = \sum_{i=1}^n \text{Cov}(X_i, Y_i) + \sum_{i \neq j} \text{Cov}(X_i, Y_j)$$
+
+Also, it is fine for you to use the definition of $\text{Var}(\hat{\beta}_1 | X)$ we have previously discussed in class; you do not need to derive that variance. 
+
+**[PUT YOUR ANSWER HERE]**
+
+# Problem 2: Analyzing Election Data (66 points)
+
+In this problem, you'll work with data I've seen in my own research. Here is the dataset:
+
+```{r}
+electionData = read.csv("https://raw.githubusercontent.com/zjbranson/36401_fall2026/refs/heads/main/electionData.csv")
+```
+
+The dataset contains information on 1,005 mayoral elections that happened in Louisiana. Thus, each row in the dataset corresponds to a mayoral election, and we have information about each election and the municipality where it occurred. (A "municipality" is a city, town, or similar community.) Here are the variables that are available for each election:
+
++ `year`: The year that the election occurred.
++ `numCandidates`: The number of candidates that ran for mayor during the election.
++ `africanAmerican`: Were any of the candidates African American? (0 = no, 1 = yes).
++ `female`: Were any of the candidates female? (0 = no, 1 = yes).
++ `hs_pct`: Proportion of the municipality's population that has a high school degree.
++ `poverty`: Proportion of the municipality's population whose income is below the poverty line.
++ `unemp`: Proportion of the municipality's population that is unemployed.
++ `voter_turnout`: The percentage of eligible voters in the municipality who voted in the election.
+
+One of the main goals of the study was to assess to what extent voter turnout was affected by the demographics of the candidates in that election and of the municipality. For this problem, we'll consider two regression models:
+
++ **Poverty-Degree Regression**: Regress `poverty` (as the outcome) onto `hs_pct` (as the covariate).
+
++ **Voter-Poverty Regression**: Regression `voter_turnout` (as the outcome) onto `poverty` (as the covariate).
+
+The purpose of these regression models is to understand how poverty rates are related to high school degree rates, and how voter turnout is related to poverty rates.
+
+## PART A (16pts)
+
+For this part, implement the **Poverty-Degree Regression** and the **Voter-Poverty Regression** mentioned at the beginning of this problem. Then, for *each* regression, create 1-2 graphs that allow you to assess *all* of the assumptions involved in the regression model. Finally, based on your graph(s), discuss the plausibility of each regression model's assumptions in 1-4 sentences.
+
+```{r}
+library(dplyr)
+
+povertyDegree <- lm(poverty ~ hs_pct, data = electionData)
+voterPoverty <- lm(voter_turnout ~ poverty, data = electionData)
+
+library(ggplot2)
+
+ggplot(electionData, aes(x = hs_pct, y = poverty)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "lm", se = TRUE, color = "blue") +
+  labs(title = "Poverty vs HS %", x = "HS %", y = "Poverty") +
+  theme_minimal()
+
+qqnorm(residuals(povertyDegree)); qqline(residuals(povertyDegree))
+
+ggplot(electionData, aes(x = poverty, y = voter_turnout)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "lm", se = TRUE, color = "red") +
+  labs(title = "Voter Turnout vs Poverty", x = "Poverty", y = "Turnout") +
+  theme_minimal()
+
+qqnorm(residuals(voterPoverty)); qqline(residuals(voterPoverty))
+```
+
+**To assess a good distribution for the residuals, we can look at their variance and overall placement in a standard scatterplot/regression line graph, and to assess normality we can use the q-q plot. For the first regression, the points on the graph compared to the line seem good, as most of them form a sort of oval shape with the lm line in the middle. With the QQplot, the residuals look pretty normal-distributed, with minor and likely negligible movement at the very ends of the graphs. With the second graph, there's no immediate warning like a curvy scatterplot distribution, but the line looks a little high compared to the majority of the points especially near 0.4 and 0.2. Also, at the right side of the QQplot the points seem to curve off in a more pronounced way from the line, so my conclusion is that we should investigate this one further, but it may be okay.**
+
+## PART B (16pts)
+
+For this part, consider the **Voter-Poverty Regression** you ran earlier, where `voter_turnout` is the outcome and `poverty` is the covariate. Using this regression, do the following:
+
++ (10pts) Create a 95\% confidence interval for the mean `voter_turnout` when `poverty = 0.30`. Then, create a 95\% prediction interval for the predicted `voter_turnout` when `poverty = 0.30`. Finally, in 1-2 sentences, write an interpretation of your 95\% confidence interval and 95\% prediction interval within the context of this dataset.
+
+```{r}
+predict(voterPoverty,
+        newdata = data.frame(poverty = 0.30),
+        interval = "confidence",
+        level = 0.95)
+
+predict(voterPoverty,
+        newdata = data.frame(poverty = 0.30),
+        interval = "prediction",
+        level = 0.95)
+```
+
+**The confidence interval for mean voter turnout when poverty was 0.3 is (54.69,56.44) which means that if poverty is 30%, we are 95% confident that the voter turnout would be between 54.69% and 56.44%. The prediction interval for predicted voter turnout when poverty is 0.3 is (24.92,86.41) which means that if a place has 30% poverty we predict that in this place there is a 95% confidence that the voter turnout would be between 24.92% and 86.41%.**
+
++ (6pts) Let's say a politician looks at your analyses and says, "I hypothesize that, on average across municipalities with a 30\% poverty rate, only half of voters will turnout to vote." Test the politician's hypothesis. In your answer, be clear about how you tested the politician's hypothesis, and be clear about what your conclusion is. (**Hint**: You *do not* need to write any new code for this part.)
+
+**At alpha level 0.05 (a reasonable hypothesis level) we can directly use the confidence interval to test a hypothesis. Because the hypothesis was that on average 50% of voters would vote, whereas our 95% confidence interval testing this said between 54.69% and 56.44% we can reject this hypothesis.**
+
+## PART C (17pts)
+
+For this part, we'll continue considering the **Voter-Poverty Regression** and your confidence and prediction intervals from the previous question. For this part, please answer the following:
+
++ (3pts) Among the 1,005 elections contained in the dataset, what proportion of them were in a municipality that had a poverty rate exactly equal to 30\% (or 0.30 on the proportion scale)? Please provide any code you used to answer this question.
+
+```{r}
+electionDataFilter <- electionData |>
+  filter(poverty == 0.30)
+
+View(electionDataFilter)
+
+nrow(electionDataFilter)
+```
+
+**Based on the code it returned there is 24 of 1005 municipalities with 30% poverty, which as a percentage of total is 2.38%**
+
++ (7pts) Among those elections held in municipalities with a poverty rate exactly equal to 30\%, what proportion of them have voter turnout percentages that are contained in your 95\% **confidence interval** from Part B? Please provide any code you used to answer this question. Then, answer the following: Is this result roughly what you would expect, given your understanding of the confidence interval in this context? State Yes or No, and explain in 1-2 sentences.
+
+**Hint**: To answer this question, it may be helpful to create a subset of the data that contains only observations with `poverty` equal to 0.30.
+
+```{r}
+electionDataFilter2 <- electionDataFilter |>
+  filter(voter_turnout >= 54.69775 & voter_turnout <= 56.64494)
+
+nrow(electionDataFilter2)
+```
+
+**Based on the graph I made for voter-poverty the points were extremely scattered and most far from the line, so the fact that none of them were within a very small margin from the average is expected (yes).**
+
++ (7pts) Among those elections held in municipalities with a poverty rate exactly equal to 30\%, what proportion of them have voter turnout percentages that are contained in your 95\% **prediction interval** from Part B? Please provide any code you used to answer this question. Then, answer the following: Is this result roughly what you would expect, given your understanding of the prediction interval in this context? State Yes or No, and explain in 1-2 sentences.
+
+```{r}
+electionDataFilter3 <- electionDataFilter |>
+  filter(voter_turnout >= 24.9265 & voter_turnout <= 86.41619)
+
+nrow(electionDataFilter3)
+```
+
+**Because for the predicted interval it is more focused with actual points, it makes sense that 95% of the ones at 0.3 poverty (22/24) are in the prediction interval (yes).**
+
+## PART D (17pts)
+
+For this part, we'll consider the **Poverty-Degree Regression** you ran earlier, where `poverty` is the outcome and `hs_pct` is the covariate. For this part, make a scatterplot that does the following:
+
++ Has `hs_pct` on the x-axis and `poverty` on the y-axis.
+
++ Draws a line denoting `poverty` predictions from your linear regression model for `hs_pct` values $0.00, 0.01, \dots, 0.99, 1.00$ (i.e., from 0 to 1 in increments of 0.01). Please color this line black.
+
++ Draws lines denoting the 95\% confidence interval for the estimated mean `poverty` from your linear regression model for `hs_pct` values $0.00, 0.01, \dots, 0.99, 1.00$. Please display two lines (one for the lower bound, one for the upper bound), colored in red.
+
++ Draws lines denoting the 95\% **prediction** interval for `poverty` from your linear regression model for `hs_pct` values $0.00, 0.01, \dots, 0.99, 1.00$. Please display two lines (one for the lower bound, one for the upper bound), colored in blue.
+
++ Draw a horizontal line at `poverty = 0`. (Because `poverty` is a rate, its minimum possible value is 0.)
+
+Please change the limits of the x- and y-axes such that the full range of all lines are visible in your plot. **After making your plot, answer these two questions:**
+
+1) In 1-2 sentences, compare and contrast the 95\% confidence interval with the 95\% prediction interval (i.e., mention one thing that's similar about the intervals, and one thing that's different about them).
+
+2) For which value of `hs_pct` is the 95\% confidence interval **narrowest**? Explain how you arrived at your answer.
+
+**Hint**: To create the sequence $0.00, 0.01, \dots, 0.99, 1.00$, you can write `seq(0, 1, by = 0.01)`. Also, for the second question, the value you find for the narrowest point of the confidence interval **does not** have to correspond to one of these numbers $0.00, 0.01, \dots, 0.99, 1.00$ specifically. Instead, you should consider the width of 95\% confidence intervals for linear regression **in general**, and consider for what value of the covariate the interval is most narrow.
+
+```{r}
+library(dplyr)
+
+new_hs <- data.frame(hs_pct = seq(0, 1, by = 0.01))
+
+ci <- predict(povertyDegree, newdata = new_hs,
+              interval = "confidence", level = 0.95)
+pi <- predict(povertyDegree, newdata = new_hs,
+              interval = "prediction", level = 0.95)
+
+predictions <- data.frame(
+  hs_pct    = new_hs$hs_pct,
+  fit       = ci[, "fit"],
+  ci_lower  = ci[, "lwr"],
+  ci_upper  = ci[, "upr"],
+  pi_lower  = pi[, "lwr"],
+  pi_upper  = pi[, "upr"]
+)
+
+ggplot(predictions, aes(x = hs_pct)) +
+  geom_point(data = electionData, aes(x = hs_pct, y = poverty),
+             alpha = 0.6) +
+  geom_line(aes(y = fit), color = "black", linewidth = 1) +
+  geom_line(aes(y = ci_lower), color = "red") +
+  geom_line(aes(y = ci_upper), color = "red") +
+  geom_line(aes(y = pi_lower), color = "blue") +
+  geom_line(aes(y = pi_upper), color = "blue") +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "gray") +
+  labs(
+    title = "Poverty vs HS % with 95% CI and PI",
+    x = "HS %",
+    y = "Poverty"
+  ) +
+  theme_minimal()
+
+mean(electionData$hs_pct)
+```
+
+**Both the confidence 95% interval and prediction 95% interval are two lines with the center of them being at the black line, but the confidence intervals are much closer to black line and there is some inward curve (aka lines not parallel). This curve comes closest to the black like around an hs percentage of 30%. Also I know that it is minimzed at xbar from my practice in regression this year, and the mean was exactly 29.01%.**
+

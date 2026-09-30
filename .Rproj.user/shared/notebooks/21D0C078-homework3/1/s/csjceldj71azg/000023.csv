@@ -1,0 +1,6 @@
+"0",""
+"0","ggplot(rentalData, aes(x = space, y = rent)) +"
+"0","  geom_point(alpha = 0.6) +"
+"0","  geom_smooth(method = ""lm"", se = TRUE, color = ""blue"") +"
+"0","  labs(title = ""Rent vs Space"", x = ""Space"", y = ""Rent"") +"
+"0","  theme_minimal()"

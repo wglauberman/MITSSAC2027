@@ -1,0 +1,1043 @@
+data_statsapiNEW <- sabRmetrics::download_statsapi(
+  start_date = "2026-03-11",
+  end_date = "2026-09-12"
+)
+View(data_statsapiNEW)
+
+pitchNEW_data <- data_statsapiNEW[["pitch"]]
+eventNEW_data <- data_statsapiNEW[["event"]]
+
+combinedNEW_data <- merge(
+  x = pitchNEW_data,
+  y = eventNEW_data,
+  by = c("game_id", "event_index"),
+  all.x = TRUE
+)
+View(combinedNEW_data)
+
+playNEW_data <- data_statsapiNEW[["play"]]
+View(playNEW_data)
+
+library(dplyr)
+
+selected_combineNEW <- combinedNEW_data |> select("play_id", "description", "pitch_type", "ax", "ay", "az", 
+                                            "vx0", "vy0", "vz0", "x0", "z0", "extension",
+                                            "spin_rate", "strike_zone_top", "strike_zone_bottom",
+                                            "inning", "half_inning", "batter_id", "pitcher_id")
+View(selected_combineNEW)
+
+ABSplay_data <- playNEW_data[playNEW_data$review_type %in% 'MJ', ]
+View(ABSplay_data)
+
+
+NEW_abs <- merge(
+  x = ABSplay_data,
+  y = selected_combineNEW,
+  by = c("play_id")
+)
+View(NEW_abs)
+
+final_pitchlevel <- merge(
+  x = playNEW_data,
+  y = selected_combineNEW,
+  by = c("play_id")
+)
+
+View(final_pitchlevel)
+
+total_pitch_type_summary <- final_pitchlevel |>
+  group_by(pitch_type) |>
+  summarise(
+    total_pitches = n(),
+  ) |>
+  arrange(desc(total_pitches))
+
+View(total_pitch_type_summary)
+
+library(ggplot2)
+
+ggplot(total_pitch_type_summary, aes(x = reorder(pitch_type, total_pitches), 
+                               y = total_pitches)) +
+  geom_bar(stat = "identity", fill = "cornsilk2", width = 0.7) +
+  geom_text(aes(label = total_pitches), hjust = -0.1, size = 3) +
+  labs(x = "Pitch Type", 
+       y = "Number of Pitches",
+       title = "how many of each pitch") +
+  coord_flip() +
+  expand_limits(y = c(0, max(total_pitch_type_summary$total_pitches) * 1.1)) +
+  theme_minimal()
+
+pitch_type_summaryNEW <- NEW_abs |>
+  group_by(pitch_type) |>
+  summarise(
+    total_challenges = n(),
+    overturns = sum(is_overturned == TRUE, na.rm = TRUE),
+    not_overturns = sum(is_overturned == FALSE, na.rm = TRUE),
+    overturn_rate = round((overturns / total_challenges) * 100, 1)
+  ) |>
+  arrange(desc(total_challenges))
+
+View(pitch_type_summaryNEW)
+
+
+total_pitch_challenge_rate <- merge(
+  x = pitch_type_summaryNEW,
+  y = total_pitch_type_summary,
+  by = c("pitch_type")
+)
+
+total_pitch_challenge_rate <- total_pitch_challenge_rate |>
+  mutate(
+    challenge_rate = round((total_challenges/total_pitches) * 100, 3),
+    total_overturn_rate = round((overturns/total_pitches) * 100, 3)
+  )
+
+View(total_pitch_challenge_rate)
+
+ggplot(total_pitch_challenge_rate, aes(x = reorder(pitch_type, challenge_rate), 
+                              y = challenge_rate)) +
+  geom_bar(stat = "identity", aes(fill = challenge_rate), width = 0.7) +
+  geom_text(aes(label = paste0(challenge_rate, "% (", total_pitches, ")")), 
+            hjust = -0.1, size = 3) +
+  scale_fill_gradient(low = "darkred", high = "darkgreen") +
+  labs(x = "Pitch Type", 
+       y = "Challenge Rate (%)",
+       title = "ABS Challenge Rate by Pitch Type") +
+  coord_flip() +
+  expand_limits(y = c(0, max(total_pitch_challenge_rate$challenge_rate) * 1.15)) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+ggplot(total_pitch_challenge_rate, aes(x = reorder(pitch_type, total_overturn_rate), 
+                                       y = total_overturn_rate)) +
+  geom_bar(stat = "identity", aes(fill = total_overturn_rate), width = 0.7) +
+  geom_text(aes(label = paste0(total_overturn_rate, "% (", total_pitches, ")")), 
+            hjust = -0.1, size = 3) +
+  scale_fill_gradient(low = "darkred", high = "darkgreen") +
+  labs(x = "Pitch Type", 
+       y = "Total Overturn Rate (%)",
+       title = "ABS Total Overturn Rate by Pitch Type") +
+  coord_flip() +
+  expand_limits(y = c(0, max(total_pitch_challenge_rate$total_overturn_rate) * 1.15)) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+
+common_challenge_type <- total_pitch_challenge_rate |>
+  filter(total_challenges > 10)
+
+ggplot(common_challenge_type, aes(x = reorder(pitch_type, challenge_rate), 
+                                       y = challenge_rate)) +
+  geom_bar(stat = "identity", aes(fill = challenge_rate), width = 0.7) +
+  geom_text(aes(label = paste0(challenge_rate, "% (", total_pitches, ")")), 
+            hjust = -0.1, size = 3) +
+  scale_fill_gradient(low = "darkred", high = "darkgreen") +
+  labs(x = "Pitch Type", 
+       y = "Challenge Rate (%)",
+       title = "ABS Challenge Rate by Pitch Type") +
+  coord_flip() +
+  expand_limits(y = c(0, max(common_challenge_type$challenge_rate) * 1.15)) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+ggplot(common_challenge_type, aes(x = reorder(pitch_type, total_overturn_rate), 
+                                       y = total_overturn_rate)) +
+  geom_bar(stat = "identity", aes(fill = total_overturn_rate), width = 0.7) +
+  geom_text(aes(label = paste0(total_overturn_rate, "% (", total_pitches, ")")), 
+            hjust = -0.1, size = 3) +
+  scale_fill_gradient(low = "darkred", high = "darkgreen") +
+  labs(x = "Pitch Type", 
+       y = "Total Overturn Rate (%)",
+       title = "ABS Total Overturn Rate by Pitch Type") +
+  coord_flip() +
+  expand_limits(y = c(0, max(common_challenge_type$total_overturn_rate) * 1.15)) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+
+
+
+
+
+
+
+
+
+abs_batters <- NEW_abs |>
+  filter(challenge_player_id == batter_id)
+
+View(abs_batters)
+
+pitch_type_summary_batters <- abs_batters |>
+  group_by(pitch_type) |>
+  summarise(
+    total_challenges = n(),
+    overturns = sum(is_overturned == TRUE, na.rm = TRUE),
+    not_overturns = sum(is_overturned == FALSE, na.rm = TRUE),
+    overturn_rate = round((overturns / total_challenges) * 100, 1)
+  ) |>
+  arrange(desc(total_challenges))
+
+View(pitch_type_summary_batters)
+
+final_pitchlevel <- merge(
+  x = playNEW_data,
+  y = selected_combineNEW,
+  by = c("play_id")
+)
+
+View(final_pitchlevel)
+
+total_pitch_type_summary <- final_pitchlevel |>
+  group_by(pitch_type) |>
+  summarise(
+    total_pitches = n(),
+  ) |>
+  arrange(desc(total_pitches))
+
+View(total_pitch_type_summary)
+
+
+batter_pitch_challenge_rate <- merge(
+  x = pitch_type_summary_batters,
+  y = total_pitch_type_summary,
+  by = c("pitch_type")
+)
+
+batter_pitch_challenge_rate <- batter_pitch_challenge_rate |>
+  mutate(
+    challenge_rate = round((total_challenges/total_pitches) * 100, 3),
+    total_overturn_rate = round((overturns/total_pitches) * 100, 3)
+  )
+
+View(batter_pitch_challenge_rate)
+
+common_challenge_typeB <- batter_pitch_challenge_rate |>
+  filter(total_challenges > 10)
+
+ggplot(common_challenge_typeB, aes(x = reorder(pitch_type, challenge_rate), 
+                                       y = challenge_rate)) +
+  geom_bar(stat = "identity", aes(fill = challenge_rate), width = 0.7) +
+  geom_text(aes(label = paste0(challenge_rate, "% (", total_pitches, ")")), 
+            hjust = -0.1, size = 3) +
+  scale_fill_gradient(low = "darkred", high = "darkgreen") +
+  labs(x = "Pitch Type", 
+       y = "Challenge Rate (%)",
+       title = "ABS Challenge Rate by Pitch Type (Batters)") +
+  coord_flip() +
+  expand_limits(y = c(0, max(common_challenge_typeB$challenge_rate) * 1.15)) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+ggplot(common_challenge_typeB, aes(x = reorder(pitch_type, overturn_rate), 
+                                       y = overturn_rate)) +
+  geom_bar(stat = "identity", aes(fill = overturn_rate), width = 0.7) +
+  geom_text(aes(label = paste0(overturn_rate, "% (", total_challenges, ")")), 
+            hjust = -0.1, size = 3) +
+  scale_fill_gradient(low = "darkred", high = "darkgreen") +
+  labs(x = "Pitch Type", 
+       y = "Overturn Rate (%)",
+       title = "ABS Overturn Rate by Pitch Type (Batters)") +
+  coord_flip() +
+  expand_limits(y = c(0, max(common_challenge_typeB$overturn_rate) * 1.15)) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+
+
+
+
+
+
+abs_catchers <- NEW_abs |>
+  filter(challenge_player_id != batter_id & challenge_player_id != pitcher_id)
+
+View(abs_catchers)
+
+pitch_type_summary_catchers <- abs_catchers |>
+  group_by(pitch_type) |>
+  summarise(
+    total_challenges = n(),
+    overturns = sum(is_overturned == TRUE, na.rm = TRUE),
+    not_overturns = sum(is_overturned == FALSE, na.rm = TRUE),
+    overturn_rate = round((overturns / total_challenges) * 100, 1)
+  ) |>
+  arrange(desc(total_challenges))
+
+View(pitch_type_summary_catchers)
+
+final_pitchlevel <- merge(
+  x = playNEW_data,
+  y = selected_combineNEW,
+  by = c("play_id")
+)
+
+View(final_pitchlevel)
+
+total_pitch_type_summary <- final_pitchlevel |>
+  group_by(pitch_type) |>
+  summarise(
+    total_pitches = n(),
+  ) |>
+  arrange(desc(total_pitches))
+
+View(total_pitch_type_summary)
+
+
+catcher_pitch_challenge_rate <- merge(
+  x = pitch_type_summary_catchers,
+  y = total_pitch_type_summary,
+  by = c("pitch_type")
+)
+
+catcher_pitch_challenge_rate <- catcher_pitch_challenge_rate |>
+  mutate(
+    challenge_rate = round((total_challenges/total_pitches) * 100, 3),
+    total_overturn_rate = round((overturns/total_pitches) * 100, 3)
+  )
+
+View(catcher_pitch_challenge_rate)
+
+common_challenge_typeC <- catcher_pitch_challenge_rate |>
+  filter(total_challenges > 10)
+
+ggplot(common_challenge_typeC, aes(x = reorder(pitch_type, challenge_rate), 
+                                        y = challenge_rate)) +
+  geom_bar(stat = "identity", aes(fill = challenge_rate), width = 0.7) +
+  geom_text(aes(label = paste0(challenge_rate, "% (", total_pitches, ")")), 
+            hjust = -0.1, size = 3) +
+  scale_fill_gradient(low = "darkred", high = "darkgreen") +
+  labs(x = "Pitch Type", 
+       y = "Challenge Rate (%)",
+       title = "ABS Challenge Rate by Pitch Type (Catchers)") +
+  coord_flip() +
+  expand_limits(y = c(0, max(common_challenge_typeC$challenge_rate) * 1.15)) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+ggplot(common_challenge_typeC, aes(x = reorder(pitch_type, overturn_rate), 
+                                        y = overturn_rate)) +
+  geom_bar(stat = "identity", aes(fill = overturn_rate), width = 0.7) +
+  geom_text(aes(label = paste0(overturn_rate, "% (", total_challenges, ")")), 
+            hjust = -0.1, size = 3) +
+  scale_fill_gradient(low = "darkred", high = "darkgreen") +
+  labs(x = "Pitch Type", 
+       y = "Overturn Rate (%)",
+       title = "ABS Overturn Rate by Pitch Type (Catchers)") +
+  coord_flip() +
+  expand_limits(y = c(0, max(common_challenge_typeC$overturn_rate) * 1.15)) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+
+
+
+View(selected_combineNEW)
+
+batter_pitch_spread <- selected_combineNEW |>
+  group_by(batter_id, pitch_type) |>
+  summarise(count = n(), .groups = 'drop') |>
+  group_by(batter_id) |>
+  mutate(total_pitches = sum(count)) |>
+  ungroup() |>
+  pivot_wider(
+    names_from = pitch_type,
+    values_from = count,
+    values_fill = 0
+  )
+
+View(batter_pitch_spread)
+
+batter_spread_names <- batter_pitch_spread |>
+  left_join(player_ids, by = c("batter_id" = "key_mlbam")) |>
+  mutate(
+    full_name = paste(name_first, name_last)
+  ) |>
+  select(full_name, batter_id, everything())
+
+View(batter_spread_names)
+
+ggplot(batter_spread_names, aes(x = total_pitches, y = CU)) +
+  geom_point(size = 4, alpha = 0.7, color = "steelblue") +
+  labs(x = "total pitches", 
+       y = "changeups",
+       title = "total pitches vs total changeups") +
+  theme_minimal()
+
+
+
+numericB <- batter_spread_names |>
+  select(where(is.numeric)) |>
+  names()
+
+col_countsB <- batter_spread_names |>
+  select(all_of(numericB)) |>
+  summarise(across(everything(), ~ sum(!is.na(.))))
+
+print(col_countsB)
+
+cols_to_keepB <- names(col_countsB)[col_countsB[1,] >= 30]
+
+correlations_pitches <- batter_spread_names |>
+  select(all_of(cols_to_keepB)) |>
+  cor(use = "pairwise.complete.obs") |>
+  as.data.frame() |>
+  select(total_pitches) |>
+  filter(rownames(.) != "total_pitches") |>
+  rename(correlation = total_pitches) |>
+  mutate(
+    r_squared = correlation^2,
+  ) |>
+  arrange(desc(r_squared))
+
+View(correlations_pitches)
+
+
+
+
+
+
+
+batter_challenge_overview <- abs_batters |>
+  group_by(challenge_player_id) |>
+  summarise(
+    total_challenges = n(),
+    overturns = sum(is_overturned == TRUE, na.rm = TRUE),
+    not_overturns = sum(is_overturned == FALSE, na.rm = TRUE),
+    overturn_rate = overturns / total_challenges * 100
+  ) |>
+  arrange(desc(total_challenges))
+
+View(batter_challenge_overview)
+
+
+batter_combined <- batter_spread_names |>
+  left_join(batter_challenge_overview, by = c("batter_id" = "challenge_player_id")) |>
+  mutate(
+    # Replace NA values with zeros for batters with no challenges
+    total_challenges = replace_na(total_challenges, 0),
+    overturns = replace_na(overturns, 0),
+    not_overturns = replace_na(not_overturns, 0),
+    overturn_rate = replace_na(overturn_rate, 0)
+  )
+
+View(batter_combined)
+
+filter_combined <- batter_combined |>
+  filter(total_challenges >= 5)
+
+
+ggplot(filter_combined, aes(x = total_pitches, y = overturn_rate)) +
+  geom_point(size = 4, alpha = 0.7, color = "steelblue") +
+  labs(x = "total pitches", 
+       y = "overturn rate",
+       title = "total pitches vs overturn rate") +
+  theme_minimal()
+
+
+
+
+
+
+
+
+
+new_rate <- total_pitch_challenge_rate |>
+  filter(overturns > 5)
+
+View(new_rate)
+
+ggplot(new_rate, aes(x = challenge_rate, y = overturn_rate)) +
+  geom_point(size = 4, alpha = 0.7, color = "blue") +
+  labs(x = "challenge rate", 
+       y = "overturn rate",
+       title = "challenge rate v overturn rate") +
+  theme_minimal()
+
+
+View(batter_pitch_challenge_rate)
+View(catcher_pitch_challenge_rate)
+
+filter_catcher_rate <- catcher_pitch_challenge_rate |>
+  filter(overturns > 1)
+
+
+
+
+
+batter_clean <- batter_pitch_challenge_rate |>
+  rename(
+    batter_rate = challenge_rate,
+    batterO = overturn_rate
+  )
+
+catcher_clean <- filter_catcher_rate |>
+  rename(
+    catcher_rate = challenge_rate,
+    catcherO = overturn_rate
+  )
+
+pitch_comparison <- batter_clean |>
+  inner_join(catcher_clean, by = "pitch_type") |>
+  mutate(
+    difference = catcher_rate - batter_rate,
+  )
+
+View(pitch_comparison)
+
+
+ggplot(pitch_comparison, aes(x = batter_rate, y = catcher_rate)) +
+  geom_point(aes(color = pitch_type), size = 4) +
+  geom_text_repel(aes(label = pitch_type), show.legend = FALSE) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed") +
+  coord_fixed() + 
+  labs(
+    title = "Batter vs Catcher Challenge Rates by Pitch Type",
+    x = "Batter Challenge Rate",
+    y = "Catcher Challenge Rate"
+  ) +
+  theme_minimal()
+
+ggplot(pitch_comparison, aes(x = batterO, y = catcherO)) +
+  geom_point(aes(color = pitch_type), size = 4) +
+  geom_text_repel(aes(label = pitch_type), show.legend = FALSE) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed") +
+  coord_fixed() + 
+  labs(
+    title = "Batter vs Catcher Overturn Rates by Pitch Type",
+    x = "Batter Overturn Rate",
+    y = "Catcher Overturn Rate"
+  ) +
+  theme_minimal()
+
+filter_comparison <- pitch_comparison |>
+  filter(overturns.x > 2)
+
+ggplot(filter_comparison, aes(x = batterO, y = catcherO)) +
+  geom_point(aes(color = pitch_type), size = 4) +
+  geom_text_repel(aes(label = pitch_type), show.legend = FALSE) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed") +
+  coord_fixed() + 
+  labs(
+    title = "Batter vs Catcher Overturn Rates by Pitch Type (>2 overturns)",
+    x = "Batter Overturn Rate",
+    y = "Catcher Overturn Rate"
+  ) +
+  theme_minimal()
+
+
+
+
+
+
+
+
+
+
+View(common_challenge_typeB)
+
+NEWcommon_challenge_typeB <- common_challenge_typeB |>
+  mutate(
+    challenge_prop = challenge_rate / 100,
+    #sqrt(p*(1-p)/n)
+    se_prop = sqrt((challenge_prop * (1 - challenge_prop)) / total_pitches),
+    se_percent = se_prop * 100,
+    lower_ci = challenge_rate - 1.645 * se_percent,
+    upper_ci = challenge_rate + 1.645 * se_percent,
+    lower_ci = pmax(lower_ci, 0),
+    upper_ci = pmin(upper_ci, 100)
+  )
+
+View(NEWcommon_challenge_typeB)
+
+ggplot(NEWcommon_challenge_typeB, aes(x = reorder(pitch_type, challenge_rate), 
+                                   y = challenge_rate)) +
+  geom_bar(stat = "identity", aes(fill = challenge_rate), width = 0.7) +
+  geom_errorbar(aes(ymin = lower_ci, ymax = upper_ci), 
+                width = 0.2, color = "black", alpha = 0.7) +
+  geom_text(aes(label = paste0(round(challenge_rate, 2), "% (", total_pitches, ")")), 
+            hjust = -0.1, size = 3) +
+  scale_fill_gradient(low = "darkred", high = "darkgreen") +
+  labs(x = "Pitch Type", 
+       y = "Challenge Rate (%)",
+       title = "ABS Challenge Rate by Pitch Type (Batters)",
+       subtitle = "90% confidence interval") +
+  coord_flip() +
+  expand_limits(y = c(0, max(NEWcommon_challenge_typeB$upper_ci, na.rm = TRUE) * 1.05)) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+
+NEWcommon_challenge_typeB <- NEWcommon_challenge_typeB |>
+  mutate(
+    overturn_prop = overturn_rate / 100,
+    #sqrt(p*(1-p)/n)
+    se_prop_over = sqrt((overturn_prop * (1 - overturn_prop)) / total_challenges),
+    se_percent_over = se_prop_over * 100,
+    lower_ci_over = overturn_rate - 1.645 * se_percent_over,
+    upper_ci_over = overturn_rate + 1.645 * se_percent_over,
+    lower_ci_over = pmax(lower_ci_over, 0),
+    upper_ci_over = pmin(upper_ci_over, 100)
+  )
+
+View(NEWcommon_challenge_typeB)
+
+ggplot(NEWcommon_challenge_typeB, aes(x = reorder(pitch_type, overturn_rate), 
+                                      y = overturn_rate)) +
+  geom_bar(stat = "identity", aes(fill = overturn_rate), width = 0.7) +
+  geom_errorbar(aes(ymin = lower_ci_over, ymax = upper_ci_over), 
+                width = 0.2, color = "black", alpha = 0.7) +
+  geom_text(aes(label = paste0(round(overturn_rate, 2), "% (", total_challenges, ")")), 
+            hjust = -0.1, size = 3) +
+  scale_fill_gradient(low = "darkred", high = "darkgreen") +
+  labs(x = "Pitch Type", 
+       y = "Overturn Rate (%)",
+       title = "ABS Overturn Rate by Pitch Type (Batters)",
+       subtitle = "90% confidence interval") +
+  coord_flip() +
+  expand_limits(y = c(0, max(NEWcommon_challenge_typeB$upper_ci, na.rm = TRUE) * 1.05)) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+
+
+
+
+
+View(common_challenge_typeC)
+
+NEWcommon_challenge_typeC <- common_challenge_typeC |>
+  mutate(
+    challenge_prop = challenge_rate / 100,
+    #sqrt(p*(1-p)/n)
+    se_prop = sqrt((challenge_prop * (1 - challenge_prop)) / total_pitches),
+    se_percent = se_prop * 100,
+    lower_ci = challenge_rate - 1.645 * se_percent,
+    upper_ci = challenge_rate + 1.645 * se_percent,
+    lower_ci = pmax(lower_ci, 0),
+    upper_ci = pmin(upper_ci, 100)
+  )
+
+View(NEWcommon_challenge_typeC)
+
+ggplot(NEWcommon_challenge_typeC, aes(x = reorder(pitch_type, challenge_rate), 
+                                      y = challenge_rate)) +
+  geom_bar(stat = "identity", aes(fill = challenge_rate), width = 0.7) +
+  geom_errorbar(aes(ymin = lower_ci, ymax = upper_ci), 
+                width = 0.2, color = "black", alpha = 0.7) +
+  geom_text(aes(label = paste0(round(challenge_rate, 2), "% (", total_pitches, ")")), 
+            hjust = -0.1, size = 3) +
+  scale_fill_gradient(low = "darkred", high = "darkgreen") +
+  labs(x = "Pitch Type", 
+       y = "Challenge Rate (%)",
+       title = "ABS Challenge Rate by Pitch Type (Catchers)",
+       subtitle = "90% confidence interval") +
+  coord_flip() +
+  expand_limits(y = c(0, max(NEWcommon_challenge_typeC$upper_ci, na.rm = TRUE) * 1.05)) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+
+
+
+NEWcommon_challenge_typeC <- NEWcommon_challenge_typeC |>
+  mutate(
+    overturn_prop = overturn_rate / 100,
+    #sqrt(p*(1-p)/n)
+    se_prop_over = sqrt((overturn_prop * (1 - overturn_prop)) / total_challenges),
+    se_percent_over = se_prop_over * 100,
+    lower_ci_over = overturn_rate - 1.645 * se_percent_over,
+    upper_ci_over = overturn_rate + 1.645 * se_percent_over,
+    lower_ci_over = pmax(lower_ci_over, 0),
+    upper_ci_over = pmin(upper_ci_over, 100)
+  )
+
+View(NEWcommon_challenge_typeC)
+
+ggplot(NEWcommon_challenge_typeC, aes(x = reorder(pitch_type, overturn_rate), 
+                                      y = overturn_rate)) +
+  geom_bar(stat = "identity", aes(fill = overturn_rate), width = 0.7) +
+  geom_errorbar(aes(ymin = lower_ci_over, ymax = upper_ci_over), 
+                width = 0.2, color = "black", alpha = 0.7) +
+  geom_text(aes(label = paste0(round(overturn_rate, 2), "% (", total_challenges, ")")), 
+            hjust = -0.1, size = 3) +
+  scale_fill_gradient(low = "darkred", high = "darkgreen") +
+  labs(x = "Pitch Type", 
+       y = "Overturn Rate (%)",
+       title = "ABS Overturn Rate by Pitch Type (Catchers)",
+       subtitle = "90% confidence interval") +
+  coord_flip() +
+  expand_limits(y = c(0, max(NEWcommon_challenge_typeC$upper_ci, na.rm = TRUE) * 1.05)) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+
+
+
+
+
+
+
+# 1. Your team lookup table
+NEWteam_name_lookup <- data.frame(
+  abbreviation = c(
+    "ARI", "ATH", "ATL", "BAL", "BOS", "CHC", "CHW", "CIN", "CLE", "COL", 
+    "DET", "HOU", "KCR", "LAA", "LAD", "MIA", "MIL", "MIN", "NYM", 
+    "NYY", "PHI", "PIT", "SDP", "SFG", "SEA", "STL", "TBR", 
+    "TEX", "TOR", "WSN"
+  ),
+  short_name = c(
+    "Diamondbacks", "Athletics", "Braves", "Orioles", "Red Sox",
+    "Cubs", "White Sox", "Reds", "Guardians", "Rockies", 
+    "Tigers", "Astros", "Royals", "Angels", "Dodgers", "Marlins",
+    "Brewers", "Twins", "Mets", "Yankees", "Phillies", "Pirates",
+    "Padres", "Giants", "Mariners", "Cardinals", "Rays", 
+    "Rangers", "Blue Jays", "Nationals"
+  )
+)
+
+# 2. Clean batters data (adds short names)
+today_batters_named <- today_batters |>
+  left_join(NEWteam_name_lookup, by = c("team_name" = "abbreviation")) |>
+  rename(team_short_name = short_name) |>
+  select(-team_name)  # Remove the abbreviation column
+
+# 3. Combine batters and fielders
+today_combined <- today_batters_named |>
+  full_join(today_fielders, by = c("team_short_name" = "team_name"))
+
+# 4. Create team lookup from game data
+NEWteam_lookup <- data_statsapiNEW[["game"]] |>
+  select(team_id = team_id_away, team_name = team_name_away) |>
+  bind_rows(
+    data_statsapi0[["game"]] |>
+      select(team_id = team_id_home, team_name = team_name_home)
+  ) |>
+  distinct(team_id, .keep_all = TRUE)
+
+# 5. Final lookup table with full names and abbreviations
+final_lookup <- data.frame(
+  team_name = c(
+    "Arizona Diamondbacks", "Athletics", "Atlanta Braves", "Baltimore Orioles", 
+    "Boston Red Sox", "Chicago Cubs", "Chicago White Sox", 
+    "Cincinnati Reds", "Cleveland Guardians", "Colorado Rockies", 
+    "Detroit Tigers", "Houston Astros", "Kansas City Royals", 
+    "Los Angeles Angels", "Los Angeles Dodgers", "Miami Marlins", 
+    "Milwaukee Brewers", "Minnesota Twins", "New York Mets", 
+    "New York Yankees", "Philadelphia Phillies", 
+    "Pittsburgh Pirates", "San Diego Padres", "San Francisco Giants", 
+    "Seattle Mariners", "St. Louis Cardinals", "Tampa Bay Rays", 
+    "Texas Rangers", "Toronto Blue Jays", "Washington Nationals"
+  ),
+  abbreviation = c(
+    "ARI", "ATH", "ATL", "BAL", "BOS", "CHC", "CHW", "CIN", "CLE", "COL", 
+    "DET", "HOU", "KCR", "LAA", "LAD", "MIA", "MIL", "MIN", "NYM", 
+    "NYY", "PHI", "PIT", "SDP", "SFG", "SEA", "STL", "TBR", 
+    "TEX", "TOR", "WSN"
+  )
+)
+
+# 6. Merge game lookup with final lookup
+final_merge <- merge(
+  x = NEWteam_lookup,
+  y = final_lookup,
+  by = c("team_name"),
+)
+
+
+
+
+
+
+
+
+
+
+
+
+
+cat("========================================\n")
+cat("STEP 1: Check today_combined\n")
+cat("========================================\n")
+cat("Columns in today_combined:\n")
+print(names(today_combined))
+cat("\nFirst 3 rows of today_combined:\n")
+print(head(today_combined, 3))
+
+cat("\n========================================\n")
+cat("STEP 2: Check NEWteam_name_lookup\n")
+cat("========================================\n")
+cat("Columns in NEWteam_name_lookup:\n")
+print(names(NEWteam_name_lookup))
+cat("\nFirst 5 rows:\n")
+print(head(NEWteam_name_lookup, 5))
+
+cat("\n========================================\n")
+cat("STEP 3: Check final_merge\n")
+cat("========================================\n")
+cat("Columns in final_merge:\n")
+print(names(final_merge))
+cat("\nFirst 5 rows:\n")
+print(head(final_merge, 5))
+
+cat("\n========================================\n")
+cat("STEP 4: Check abs_catchers\n")
+cat("========================================\n")
+cat("Columns in abs_catchers:\n")
+print(names(abs_catchers))
+cat("\nFirst 3 rows:\n")
+print(head(abs_catchers, 3))
+
+cat("\n========================================\n")
+cat("STEP 5: Test the first join (today_combined + NEWteam_name_lookup)\n")
+cat("========================================\n")
+test_join1 <- today_combined |>
+  left_join(NEWteam_name_lookup, by = c("team_short_name" = "short_name"))
+
+cat("Columns after first join:\n")
+print(names(test_join1))
+cat("\nRows after join:", nrow(test_join1), "\n")
+
+cat("\n========================================\n")
+cat("STEP 6: Test the second join (with final_merge)\n")
+cat("========================================\n")
+test_join2 <- test_join1 |>
+  rename(team_abbr = abbreviation) |>
+  left_join(final_merge, by = c("team_abbr" = "abbreviation"))
+
+cat("Columns after second join:\n")
+print(names(test_join2))
+cat("\nRows after join:", nrow(test_join2), "\n")
+
+# Look for team_name columns
+cat("\nColumns containing 'team' or 'name':\n")
+print(names(test_join2)[grepl("team|name", names(test_join2), ignore.case = TRUE)])
+
+cat("\n========================================\n")
+cat("STEP 7: Identify the best join key for abs_catchers\n")
+cat("========================================\n")
+cat("Possible join keys in abs_catchers:\n")
+print(names(abs_catchers)[grepl("team|id|abbr", names(abs_catchers), ignore.case = TRUE)])
+
+cat("\nPossible join keys in test_join2:\n")
+print(names(test_join2)[grepl("team|id|abbr", names(test_join2), ignore.case = TRUE)])
+
+cat("\n========================================\n")
+cat("STEP 8: Check for common columns between abs_catchers and test_join2\n")
+cat("========================================\n")
+common_cols <- intersect(names(abs_catchers), names(test_join2))
+cat("Common columns:\n")
+print(common_cols)
+
+# Specifically look for team ID columns
+team_id_cols <- intersect(
+  names(abs_catchers)[grepl("team|id", names(abs_catchers), ignore.case = TRUE)],
+  names(test_join2)[grepl("team|id", names(test_join2), ignore.case = TRUE)]
+)
+cat("\nPossible team ID columns that could be used for joining:\n")
+print(team_id_cols)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+View(test_join2)
+
+# Clean today_combined to have team info
+today_combined_clean <- test_join2 |>
+  select(
+    # Team identifiers
+    team_id,
+    team_name, 
+    team_abbr,
+    
+    # ABS challenge stats
+    BCorrect_pct,
+    CCorrect_pct,
+    `O-Swing_pct`,        
+    AsCCorrect_pct,
+    
+    # Catcher stats
+    rSZ,
+    rCERA,
+    CStrikes,
+    CFraming.y,
+    DRS,
+    OAA,
+    rSB,
+    rGDP,
+    rARM,
+    rGFP,
+    rPM,
+    
+    # Batter plate discipline
+    `O-Swing_pct`,        
+    `Z-Swing_pct`,        
+    SwStr_pct,
+    Contact_pct,
+    Zone_pct,
+    `F-Strike_pct`,       
+    CStr_pct,
+    `C+SwStr_pct`,
+    K_pct,
+    BB_pct,
+    
+    
+    pfx_spCUO
+  )
+
+View(today_combined_clean)
+
+model_data <- abs_catchers |>
+  left_join(today_combined_clean, by = c("challenge_team_id" = "team_id")) |>
+  # Select final columns for regression
+  select(
+    challenge_team_id,
+    team_name,
+    team_abbr,
+    BCorrect_pct,
+    CCorrect_pct,
+    `O-Swing_pct`,
+    rSZ,
+    rCERA,
+    CStrikes,
+    CFraming.y,
+    DRS,
+    OAA,
+    SwStr_pct,
+    Contact_pct,
+    K_pct,
+    BB_pct,
+    pfx_spCUO,
+    everything()
+  )
+
+View(model_data)
+
+
+
+
+model <- lm(BCorrect_pct ~ pfx_spCUO, data = model_data)
+summary(model)
+
+
+model_multi <- lm(CCorrect_pct ~ rSZ + `O-Swing_pct`, data = model_data)
+summary(model_multi)
+
+
+
+
+#rSZ in current situation
+glm_success <- glm(is_overturned ~ rSZ + pre_balls + pre_strikes + pre_outs,
+                   data = model_data,
+                   family = binomial)
+summary(glm_success)
+
+#each unit increase in rSZ changes the odds of success by exp(coef)
+exp(coef(glm_success))
+
+#catcher features
+glm_catcher <- glm(is_overturned ~ rSZ + rCERA + CStrikes + DRS + OAA,
+                   data = model_data,
+                   family = binomial)
+summary(glm_catcher)
+
+#game position
+glm_context <- glm(is_overturned ~ pre_balls + pre_strikes + pre_outs + inning,
+                   data = model_data,
+                   family = binomial)
+summary(glm_context)
+
+#pitch features
+glm_pitch <- glm(is_overturned ~ pitch_type + spin_rate + strike_zone_top + strike_zone_bottom,
+                 data = model_data,
+                 family = binomial)
+summary(glm_pitch)
+
+#all in one
+glm_full <- glm(is_overturned ~ rSZ + rCERA + CStrikes + pre_balls + pre_strikes + 
+                  pre_outs + spin_rate + pitch_type,
+                data = model_data,
+                family = binomial)
+summary(glm_full)
+
+#aic, lower is more quality
+AIC(glm_success, glm_catcher, glm_context, glm_pitch, glm_full)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Model 6: What predicts how many challenges a catcher makes?
+# First, aggregate by catcher/team
+challenge_counts <- model_data |>
+  group_by(challenge_player_id, team_name) |>
+  summarise(
+    total_challenges = n(),
+    avg_rSZ = mean(rSZ, na.rm = TRUE),
+    avg_CStrikes = mean(CStrikes, na.rm = TRUE),
+    avg_DRS = mean(DRS, na.rm = TRUE)
+  )
+
+View(challenge_counts)
+glm_count <- glm(total_challenges ~ avg_rSZ + avg_CStrikes + avg_DRS,
+                 data = challenge_counts,
+                 family = poisson)
+summary(glm_count)
+
+# Model 7: Team-level proportion with weights
+# Aggregate to team level with total challenges as weights
+team_success <- model_data %>%
+  group_by(team_name) %>%
+  summarise(
+    successes = sum(is_overturned == TRUE, na.rm = TRUE),
+    total = n(),
+    avg_rSZ = mean(rSZ, na.rm = TRUE),
+    avg_OAA = mean(OAA, na.rm = TRUE)
+  )
+
+View(team_success)
+glm_proportion <- glm(cbind(successes, total - successes) ~ avg_rSZ + avg_OAA,
+                      data = team_success,
+                      family = binomial)
+summary(glm_proportion)
+
+
+pnorm(-2.355)
+2*pt(-abs(0.003491),20)

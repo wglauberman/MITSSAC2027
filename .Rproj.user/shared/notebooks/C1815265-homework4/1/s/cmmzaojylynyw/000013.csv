@@ -1,0 +1,8 @@
+"0","electionDataFilter2 <- electionDataFilter |>"
+"0","  filter(voter_turnout >= 54.69775 & voter_turnout <= 56.64494)"
+"0",""
+"0","nrow(electionDataFilter2)"
+"1","[1]"
+"1"," 0"
+"1","
+"

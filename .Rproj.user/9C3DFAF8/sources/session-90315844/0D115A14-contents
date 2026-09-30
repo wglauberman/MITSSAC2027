@@ -1,0 +1,390 @@
+---
+title: "73-265 Homework 2: Tidy data, keys, joins, and audits"
+author: "Will Glauberman"
+format:
+  html:
+    embed-resources: true
+    css: ../../setup/ryg_assignments.css
+execute:
+  warning: false
+  message: false
+---
+
+## Purpose
+
+This individual assignment asks you to reason about data structure before regression. You will predict the intended structure, reshape a file, test keys, diagnose a problematic join, and document a compact audit.
+
+::: {.ryg-policy}
+### AI Policy
+
+Each question or part carries a visible **RED**, **YELLOW**, or **GREEN** designation. **RED** means no AI use and requires independent reasoning. **YELLOW** permits AI only within the stated constraints; disclose the tool, how and where it was used, and the key prompts, inputs, or intermediate steps that materially shaped the answer. **GREEN** permits broad AI use; disclose the tool and where it was used, and remain responsible for the quality of the result and your judgment.
+
+When you use an LLM or other generative-AI tool on a YELLOW or GREEN item, also submit the prompts used as screenshots of the relevant prompts/conversation or as prompts copied into a text document. Submit the disclosure and prompt documentation with the assignment in the manner specified on Canvas. Prompt submission is additional to citation/acknowledgment and the explanation of use; it does not make prohibited use permissible. For an AI-enabled tool without a meaningful prompt interaction, disclose the tool and explain its use, but no fictional prompt artifact is required.
+
+AI use is not required unless a question explicitly states otherwise. If an item is unlabeled or unclear, ask the instructor before using AI. See the syllabus for the complete course AI policy.
+:::
+
+## Files and submission
+
+Work inside the supplied `73-265-HW2` folder. Save your completed source as:
+
+- `LastName_FirstName_HW2.qmd`
+
+Render it and submit both:
+
+- `LastName_FirstName_HW2.qmd`
+- `LastName_FirstName_HW2.html`
+
+The names before the extensions must match. Do not submit a ZIP archive.
+
+```{r}
+library(tidyverse)
+
+gdp_wide <- read_csv(
+  "data/gdp_per_capita_wide.csv",
+  show_col_types = FALSE
+)
+
+unemployment <- read_csv(
+  "data/unemployment_rate_teaching.csv",
+  show_col_types = FALSE
+)
+```
+
+## 1. Source, units, and current row structure
+
+<p class="ryg-part"><span class="ryg-label ryg-red">RED</span> Source, row-unit, unit, and wide/long explanations must reflect your independent reasoning.</p>
+<p class="ryg-part"><span class="ryg-label ryg-yellow">YELLOW</span> AI may assist with inspection syntax or debugging; verify both imported objects and disclose the assistance.</p>
+
+Read `data/DATA_PROVENANCE.md`. For each file, state:
+
+- the source;
+- what one distributed row currently represents;
+- the important units;
+- whether the file is currently wide or long for economy-year analysis.
+
+Inspect both objects with code.
+
+**The source is shared for these two files, both from the World Development Indicators. For the first file, one row represents an economy, the relevant unit are country codes, countries, and GDP per capita in USD, and it is a wide file. For the second file, one row represent an economy year unemployment rate, the important units are country code, year, and unemployment rate percent, and covering all years in one column, it is long analysis.**
+
+```{r}
+# Inspect both objects here.
+readLines("data/DATA_PROVENANCE.md")
+```
+
+## 2. Prediction before pivoting
+
+<p class="ryg-part"><span class="ryg-label ryg-red">RED</span> Make and explain the row-count and key predictions independently before running the transformation.</p>
+
+Before running `pivot_longer()`, predict:
+
+- the number of rows the GDP data should have after becoming one economy-year per row;
+- the candidate key of the long data.
+
+Explain your reasoning in words.
+
+**Because the gdp data has 6 countries with 3 years of economy info per country, if all rows are available I would predict 18 rows. For the long data, the candidate key would be something distinguishing each row, and since each country appears for multiple years (so years also repeat), the unemployment rate would be that key.**
+
+## 3. Pivot and verify
+
+<p class="ryg-part"><span class="ryg-label ryg-yellow">YELLOW</span> AI may assist with pivoting or inverse-check syntax; verify the resulting structure and outputs.</p>
+<p class="ryg-part"><span class="ryg-label ryg-red">RED</span> The expected-versus-actual comparison and explanation must be your independent reasoning.</p>
+
+Create `gdp_long` with columns:
+
+- `country_code`;
+- `country`;
+- `year` as an integer;
+- `gdp_per_capita_usd`.
+
+```{r}
+# pivot_longer() and year conversion here.
+View(gdp_wide)
+gdp_long <- gdp_wide |>
+  pivot_longer(
+    cols = 3:5, names_to = "year", 
+    names_prefix = "gdp_per_capita_usd_",
+    names_transform = list(year = as.integer),
+    values_to = "gdp_per_capita_usd")
+View(gdp_long)
+```
+
+Compare expected and actual rows. Use `pivot_wider()` once to check that you can return to separate year columns.
+
+```{r}
+# Small inverse check here.
+gdp_original <- gdp_long |>
+  pivot_wider(
+    names_from = year, 
+    values_from = "gdp_per_capita_usd",
+    names_prefix = "gdp_per_capita_usd_")
+View(gdp_original)
+```
+
+## 4. Test candidate keys
+
+<p class="ryg-part"><span class="ryg-label ryg-yellow">YELLOW</span> AI may assist with duplicate-key checking code; verify the displayed key groups.</p>
+<p class="ryg-part"><span class="ryg-label ryg-red">RED</span> State the intended cardinality and diagnose the revealed problem independently.</p>
+
+Test whether `country_code + year` is unique in both `gdp_long` and `unemployment`. Display only duplicated key combinations.
+
+```{r}
+# Key checks here.
+#View(gdp_long)
+#View(unemployment)
+long_copies <- gdp_long |>
+  count(country_code, year) |>
+  filter(n > 1)
+
+unemployment_copies <- unemployment |>
+  count(country_code, year) |>
+  filter(n > 1)
+
+long_copies
+unemployment_copies
+```
+
+State the intended cardinality between the two files. What problem did your check reveal?
+
+**Each file should have 18 rows for 6 countries and 3 years of data, and my made gdp_long file does, but the unemployment file has germany's 2020 ratings there twice so it has 19 rows**
+
+## 5. Predict the join before running it
+
+<p class="ryg-part"><span class="ryg-label ryg-red">RED</span> Choose and justify the join, retained population, expected rows, and predicted failure independently before running code.</p>
+
+The analysis should retain every economy-year in the GDP data and add the modeled unemployment rate where available.
+
+Before coding, state:
+
+- the appropriate GDP-left join;
+- the retained population;
+- expected rows if both keys were unique;
+- predicted effect of the problem found in Question 4.
+
+**We want to join GDP as a left join added with unemployment and group by country (or country code) and year. Since the germany 2020 appears twice it is retained twice, so there are 19 rows (should be 18 if all country/year combos were different). Because of the duplication we would have an extra row**
+
+## 6. Run, diagnose, and repair the problematic join
+
+<p class="ryg-part"><span class="ryg-label ryg-yellow">YELLOW</span> AI may assist with join, duplicate-removal, or debugging syntax; verify all pre/post row counts and the repaired key.</p>
+<p class="ryg-part"><span class="ryg-label ryg-red">RED</span> Identify the specific failure and explain why the repair is valid using your own reasoning.</p>
+
+Run the initial join and compare pre-/post-join rows. Identify the specific key that creates accidental duplication.
+
+**DEU / 2020 appears twice in the unemployment chart so it is there duplicated**
+
+```{r}
+# Initial join, row comparison, and diagnosis here.
+combined_data <- gdp_long |>
+  left_join(unemployment, by = c("country_code", "year"))
+View(combined_data)
+```
+
+The duplicated unemployment record is exact. Create `unemployment_clean` with one copy of each exact economy-year record. Recheck the key and rerun the left join as `gdp_unemployment`.
+
+```{r}
+# Repair and clean join here.
+unemployment_clean <- unemployment |>
+  distinct(country_code, year, .keep_all = TRUE)
+View(unemployment_clean)
+
+gdp_unemployment <- gdp_long |>
+  left_join(unemployment_clean, by = c("country_code", "year"))
+View(gdp_unemployment)
+```
+
+## 7. Unmatched keys, missingness, and spot checks
+
+<p class="ryg-part"><span class="ryg-label ryg-yellow">YELLOW</span> AI may assist with anti-join and checking syntax; independently verify the returned keys and counts.</p>
+<p class="ryg-part"><span class="ryg-label ryg-red">RED</span> Interpret what the unmatched and missing results mean for the retained population independently.</p>
+
+Use `anti_join()` in both directions to identify:
+
+- GDP economy-years without unemployment;
+- unemployment economy-years not retained by the GDP-left join.
+
+Count missing GDP and unemployment values after the clean join. Spot-check the duplicated key you repaired and one left-table key that lacks an unemployment match.
+
+```{r}
+# Unmatched, missingness, and spot checks here.
+gdp_without_unemployment <- gdp_long |>
+  anti_join(unemployment, by = c("country_code", "year"))
+
+unemployment_without_gdp <- unemployment |>
+  anti_join(gdp_long, by = c("country_code", "year"))
+
+gdp_without_unemployment
+unemployment_without_gdp
+```
+
+**The only row with gdp and no unemployment was Japan in 2021, and the only one with unemployment and no gdp was canada in 2020 (which is why it doesn't even show up in the left join). Because germany 2020 has both values it does not show up here.**
+
+## 8. Compact audit
+
+<p class="ryg-part"><span class="ryg-label ryg-yellow">YELLOW</span> AI may assist with constructing the compact audit table; verify every entry against prior output.</p>
+<p class="ryg-part"><span class="ryg-label ryg-red">RED</span> Write the four-part audit explanation from your own understanding of the data workflow.</p>
+
+Create one compact table with at least these checks:
+
+- predicted long-GDP rows;
+- actual long-GDP rows;
+- duplicated unemployment key groups before repair;
+- raw-join rows;
+- clean-join rows;
+- GDP rows without unemployment;
+- unemployment rows not retained;
+- missing GDP values;
+- missing unemployment values after joining.
+
+```{r}
+# Audit table here.
+audit <- tibble(
+  metric = c(
+    "Predicted long-GDP rows",
+    "Actual long-GDP rows",
+    "Duplicated unemployment key groups before repair",
+    "Raw-join rows",
+    "Clean-join rows",
+    "GDP rows without unemployment",
+    "Unemployment rows not retained",
+    "Missing GDP values",
+    "Missing unemployment values after joining"
+  ),
+  value = c(
+    18,
+    18,
+    1, #germany 2020
+    20, #18 plus 2020 duplicate germany + 2021 japan
+    19, #18 plus 2020 duplicate germany
+    1, #japan 2021
+    1, #canada 2020
+    0, #that row won't be in the gdp chart
+    NA #displays NA for japan 2021
+  )
+)
+
+audit
+```
+
+Write a concise audit explanation answering:
+
+1. What population does the final file retain?
+2. What caused the extra row and how was it repaired?
+3. What unmatched or missing information remains?
+4. What evidence shows the clean join did what you intended?
+
+**The final file had the countries with at least a GDP value. In the original unemployment chart germany's 2020 appeared twice and by using distinct() i removed the extra row. Japan's 2021 still does not have an unemployment value to match with gdp, and because canada 2020 doesnt have a gdp value it didn't show up in chart. Because my joined chart preserved gdp and unemployment values from both charts (which can be checked by using View()) this means my clean join did what was intended.**
+
+
+## Exam-Style Practice
+
+Complete the RED predictions before running the YELLOW verification code. All necessary rows are printed below.
+
+### Block A — Customers and service requests
+
+**Customers**
+
+| customer_id | region |
+|---|---|
+| C01 | North |
+| C02 | South |
+| C03 | West |
+
+**Service requests**
+
+| request_id | customer_id | issue |
+|---|---|---|
+| R1 | C01 | billing |
+| R2 | C01 | delivery |
+| R3 | C03 | billing |
+| R4 | C99 | delivery |
+
+<p class="ryg-part"><span class="ryg-label ryg-red">RED</span> Without R or AI: (a) state the unit of observation and a valid key for each table; (b) describe the relationship from customers to requests among matching IDs; (c) predict the number of rows in a customers-left join and explain each contribution; (d) predict the number of rows in an inner join; and (e) identify the unmatched record(s) omitted or retained by each join.</p>
+
+**In both charts the matching key is the customer id, and in the first chart we are observing region vs the second one observing issues. Each request id is matched to a different customer from some region, and the request is for a certain issue. In a customers left-join, all customers rows would stay, but the c99 row in service requests would not join with it because there's no c99 in the "left" chart, so there would be 4 rows (c01,c01,c02,c03 and both c01s would have north region). An inner join keeps rows from both charts that have a match, so this would be both c01 requests matched with the c01 north region (2 rows) and the c03 in both (1 row) for a total of 3 rows, leaving out c02 and c99.**
+
+### Block B — A many-to-many multiplication
+
+**Inventory**
+
+| product | warehouse | units |
+|---|---|---:|
+| P1 | East | 12 |
+| P1 | West | 9 |
+| P2 | East | 5 |
+
+**Promotions**
+
+| product | promotion |
+|---|---|
+| P1 | Email |
+| P1 | Coupon |
+| P2 | Email |
+
+<p class="ryg-part"><span class="ryg-label ryg-red">RED</span> The analyst joins on `product` alone. Without R or AI: (a) state whether `product` is a key in either table; (b) predict the output rows for P1 and the total output rows; (c) state the output unit of observation; (d) calculate the apparent sum of `units` after the join; and (e) explain why that sum is not total inventory.</p>
+
+**Product would be the matching key in both tables, but because R would not know which P1 to match with which it would match both promotions to both warehouses/units making 4 rows of P1 and 1 row of P2, with output observing units based on product. The sum would be 12+12+9+9+5 which is 47 but it's really 12+9+5=26, and the 3 promotions line up with the 3 products 1:1**
+
+### Verify the predictions
+
+<p class="ryg-part"><span class="ryg-label ryg-yellow">YELLOW</span> Implement the two joins below and verify the RED row-count predictions. AI may assist with syntax, but reconcile the printed output with your hand reasoning.</p>
+
+```{r}
+customers_exam <- tribble(
+  ~customer_id, ~region,
+  "C01", "North",
+  "C02", "South",
+  "C03", "West"
+)
+
+requests_exam <- tribble(
+  ~request_id, ~customer_id, ~issue,
+  "R1", "C01", "billing",
+  "R2", "C01", "delivery",
+  "R3", "C03", "billing",
+  "R4", "C99", "delivery"
+)
+
+customers_left <- customers_exam |>
+  left_join(requests_exam, by = "customer_id")
+
+customers_inner <- customers_exam |>
+  inner_join(requests_exam, by = "customer_id")
+
+nrow(customers_left)
+nrow(customers_inner)
+
+inventory_exam <- tribble(
+  ~product, ~warehouse, ~units,
+  "P1", "East", 12,
+  "P1", "West", 9,
+  "P2", "East", 5
+)
+
+promotions_exam <- tribble(
+  ~product, ~promotion,
+  "P1", "Email",
+  "P1", "Coupon",
+  "P2", "Email"
+)
+
+inventory_promotions <- inventory_exam |>
+  left_join(promotions_exam, by = "product")
+
+nrow(inventory_promotions)
+sum(inventory_promotions$units)
+
+```
+
+## 9. AI disclosure
+
+<p class="ryg-part"><span class="ryg-label ryg-red">RED</span> Complete the authorship disclosure yourself; do not use AI to draft or revise it.</p>
+
+Write `No AI used.` or identify each YELLOW/GREEN item on which AI materially assisted, the tool, how it assisted, and what you checked. Submit the required prompt documentation separately with the assignment as specified on Canvas.
+
+**No AI used**
+
+## 10. Clean-session submission check
+
+<p class="ryg-part"><span class="ryg-label ryg-yellow">YELLOW</span> AI may help diagnose a rendering error, but you must personally perform and verify every submission check.</p>
+
+Restart R, render without Console-created objects, inspect the HTML, and submit the matching QMD and HTML files.
